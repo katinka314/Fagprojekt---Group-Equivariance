@@ -1,5 +1,13 @@
 docs/site/
 
+# Virtual environment (managed by uv)
+.venv/
+
+# uv cache
+.uv/
+.ruff_cache/
+
+
 # test cache
 manual_test/
 
