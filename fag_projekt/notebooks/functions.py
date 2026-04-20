@@ -1,72 +1,64 @@
 
-import torch 
-import torch.nn as nn
-import torch.nn.functional  as F
-from torchvision import transforms
 import numpy as np
 import matplotlib.pyplot as plt
-import torch
-from torch import Tensor
-import numpy as np
-import torch.nn as nn
-import kagglehub
-import pandas as pd
-import PIL.Image as Image
+
+#import torch 
+#import torch.nn as nn
+#import torch.nn.functional  as F
 from torchvision import transforms
+#from torch import Tensor
+
+#import kagglehub
+#import pandas as pd
+#import PIL.Image as Image
 
 
 """ TODO: Vi skal skrive den med underfunktioner for læsbarhed """
-def kernel(kernel_size: int, l: int, plot: bool = False) ->  list:
-    """ Skaber l sin/cos kernels, som kan bruges til at lave cnn learning på.
-    Kan plotte hvis man vil:)"""
+def fourier_basis(kernel_size: int, l: int, plot: bool = False) ->  list:
+    """ 
+    Input:
+    kernel_size: int: højden/bredden på kernel. 
+    l: hvor høj resulution af basiser du får. er frekvensen af højeste basis.
+    l = 0 giver den konstante funktion ud, l = 1 giver konstant, cosinus og sinus med frkvens = 1
+        
+    Output:
+    1 + 2 * l basisfunktioner (kernels) i størrelse nxn
+    
+    """
     transform = transforms.ToTensor()
     n = kernel_size
-    angle_map = np.zeros((n,n))
-    for x in range(int(-np.floor(n/2)), int(np.ceil(n/2))):    
-        for y in (range(int(-np.floor(n/2)), int(np.ceil(n/2)))):
-
-            if x == 0:
-                if y > 0:
-                    thet = np.pi/2
-                elif y < 0:
-                    thet = np.pi*3 /2
-                else:
-                    thet = 0
-            else:
-                thet = np.arctan(y/x)
-                if x < 0:
-                    if y < 0:
-                        thet -= np.pi
-                    else:
-                        thet += np.pi
-            xx = x + int(np.floor(n/2))
-            yy = n - (y + int(np.floor(n/2))) -1
-
-            angle_map[yy,xx] = thet
-
-    lst = []
+    angle_map = np.zeros((n,n)) # maps each position in kernel to an angle.
+    
+    center_coords = [-(n - 1)/2 + i for i in range(n)] # the x/y coordinates, when origo is set in the middle of the kernel. #n = 5: fra -2 til 2. n = 6 fra -2,5 til 2,5
+    for x in center_coords:    
+        for y in center_coords:
+            theta = np.arctan2(y,x) #functionen tagerargumenterne ind i den rækkefølge somehow.
+            x_idx = int(x + center_coords[-1])
+            y_idx = (n-1) - int(y + center_coords[-1])
+            angle_map[x_idx, y_idx] = theta
+    basis = []
     kernel_0 = np.ones((n,n))
-    lst.append(kernel_0)
+    basis.append(kernel_0)
     for l_ in range(1,l+1):
-        kernel_sin = np.sin(l_*angle_map)
-        kernel_cos = np.cos(l_*angle_map)
-        kernel_sin = transform(kernel_sin)
-        kernel_cos = transform(kernel_cos)
-        lst.append(kernel_sin)
-        lst.append(kernel_cos)
-    if plot:
+        kernel_sin = transform(np.sin(l_*angle_map))
+        kernel_cos = transform(np.cos(l_*angle_map))
+        basis.append(kernel_sin)
+        basis.append(kernel_cos)
+        
+    if plot: # plots the non-constant basis functions
+        #OBS imshow uses rows downwards. We therefore transpose the matrix before plotting.
         fig, axes = plt.subplots(2, l, figsize=(3 * l, 6))
         if l == 1:
             axes = axes.reshape(2, 1)
         for l_ in range(1, l+1):
-            axes[0, l_ - 1].imshow(lst[2*l_ - 1].squeeze())
+            axes[0, l_ - 1].imshow(basis[2*l_ - 1].squeeze().T)
             axes[0, l_ - 1].set_title(f"sin (l={l_})")
             axes[0, l_ - 1].axis('off')
-            axes[1, l_ - 1].imshow(lst[2*l_].squeeze())
+            axes[1, l_ - 1].imshow(basis[2*l_].squeeze().T)
             axes[1, l_ - 1].set_title(f"cos (l={l_})")
             axes[1, l_ - 1].axis('off')
-            
         plt.show()
-    return lst
+
+    return basis
 
 

@@ -24,6 +24,9 @@ dependencies = [
     "torch>=2.5,<2.7",
     "torchvision>=0.20,<0.22",
     "typer>=0.15,<1.0",
+    "matplotlib>=3.10.8",
+    "kagglehub>=1.0.0",
+    "pandas>=3.0.2",
 ]
 
 [dependency-groups]
