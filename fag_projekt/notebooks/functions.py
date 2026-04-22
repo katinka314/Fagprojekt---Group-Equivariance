@@ -37,7 +37,7 @@ def fourier_basis(kernel_size: int, l: int, plot: bool = False) ->  list:
             y_idx = (n-1) - int(y + center_coords[-1])
             angle_map[x_idx, y_idx] = theta
     basis = []
-    kernel_0 = np.ones((n,n))
+    kernel_0 = transform(np.ones((n,n)))
     basis.append(kernel_0)
     for l_ in range(1,l+1):
         kernel_sin = transform(np.sin(l_*angle_map))
