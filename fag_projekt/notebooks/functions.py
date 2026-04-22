@@ -28,14 +28,18 @@ def fourier_basis(kernel_size: int, l: int, plot: bool = False) ->  list:
     transform = transforms.ToTensor()
     n = kernel_size
     angle_map = np.zeros((n,n)) # maps each position in kernel to an angle.
-    
+    radius_map = np.zeros((n,n)) # maps each position in kernel to an radius
     center_coords = [-(n - 1)/2 + i for i in range(n)] # the x/y coordinates, when origo is set in the middle of the kernel. #n = 5: fra -2 til 2. n = 6 fra -2,5 til 2,5
     for x in center_coords:    
         for y in center_coords:
-            theta = np.arctan2(y,x) #functionen tagerargumenterne ind i den rækkefølge somehow.
             x_idx = int(x + center_coords[-1])
             y_idx = (n-1) - int(y + center_coords[-1])
+
+            theta = np.arctan2(y,x) #functionen tagerargumenterne ind i den rækkefølge somehow.
             angle_map[x_idx, y_idx] = theta
+
+            r = np.sqrt(x**2 + y**2)
+            radius_map[x_idx, y_idx] = r
     basis = []
     kernel_0 = transform(np.ones((n,n)))
     basis.append(kernel_0)
@@ -59,6 +63,6 @@ def fourier_basis(kernel_size: int, l: int, plot: bool = False) ->  list:
             axes[1, l_ - 1].axis('off')
         plt.show()
 
-    return basis
+    return basis, radius_map
 
 
