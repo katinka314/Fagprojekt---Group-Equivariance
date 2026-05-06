@@ -37,25 +37,67 @@ class MLP_Radius(nn.Module):
 class LiftingLayer(nn.Module):
     def __init__(self, in_features, out_features, kernel_size, l,  bias=True):
         super(LiftingLayer, self).__init__()
-        self.MLP_Radius_ = MLP_Radius(bias = bias)
+        
         # Define learnable parameters
         self.k_size = kernel_size
  
         self.l = l
         self.out_features = out_features
+        self.bias = bias
         
+        self.basis, self.radius_map = fourier_basis(kernel_size = self.k_size, l = self.l)
+    
+    def parsing(self, out):
+        
+        return
+        
+         
     def forward(self, x):
         # x shape: (batch_size, in_features)
         #fourier folder
-        basis, radius_map = fourier_basis(kernel_size = self.k_size, l = self.l)
-        radius_map = torch.tensor(radius_map).float().flatten().unsqueeze(1)
+        
+        radius_map = torch.tensor(self.radius_map).float().flatten().unsqueeze(1)
         kernels = []
         for _ in range(self.out_features):
-            for i in range(len(basis)):
-                radial_weights = self.MLP_Radius_(radius_map).squeeze_().reshape(self.k_size,self.k_size)
-                kernels.append(basis[i] * radial_weights)
+            for i in range(len(self.basis)):
+                MLP_Radius_ = MLP_Radius(bias = self.bias)
+                radial_weights = MLP_Radius_(radius_map).squeeze_().reshape(self.k_size,self.k_size)
+                kernels.append(self.basis[i] * radial_weights)
         kernels = torch.stack(kernels).unsqueeze_(1)
 
         out = F.conv2d(input = x, weight=kernels) #??? SKAL vi specificerer bias, stride padding???
+
+        return out
+
+
+    
+class ConvLayer(nn.Module):
+    def __init__(self, in_features, out_features, kernel_size, l,  bias=True):
+        super(LiftingLayer, self).__init__()
         
+        # Define learnable parameters
+        self.k_size = kernel_size
+ 
+        self.l = l
+        self.out_features = out_features
+        self.bias = bias
+        
+        self.basis, self.radius_map = fourier_basis(kernel_size = self.k_size, l = self.l)
+        self.frequency_dict = {f'{in_freq}, {out_freq}': MLP_Radius(bias = self.bias) for in_freq in range(l + 1) for out_freq in range(l + 1)}
+        
+         
+    def forward(self, x):
+        # x shape: (batch_size, in_features)
+        
+        radius_map = torch.tensor(self.radius_map).float().flatten().unsqueeze(1)
+        kernels = []
+        for _ in range(self.out_features):
+            for i in range(len(self.basis)):
+                MLP_Radius_ = MLP_Radius(bias = self.bias)
+                radial_weights = MLP_Radius_(radius_map).squeeze_().reshape(self.k_size,self.k_size)
+                kernels.append(self.basis[i] * radial_weights)
+        kernels = torch.stack(kernels).unsqueeze_(1)
+
+        out = F.conv2d(input = x, weight=kernels) #??? SKAL vi specificerer bias, stride padding???
+
         return out
