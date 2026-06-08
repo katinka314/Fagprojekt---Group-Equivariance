@@ -43,10 +43,12 @@ def fourier_basis(kernel_size: int, l: int, plot: bool = False) ->  list:
             radius_map[x_idx, y_idx] = r
     radius_map = radius_map/np.max(radius_map)
     basis = []
-    kernel_0 = transform(np.ones((n,n)))
-    basis.append(kernel_0)
-    for l_ in range(1,l+1):
-        kernel = transform(np.exp(1j* l_*angle_map))
+    
+    for l_ in range(-l,l+1):
+        if l_ == 0:
+            kernel = transform(np.ones((n,n)))
+        else:
+            kernel = transform(np.exp(1j* l_*angle_map))
         # kernel_sin = transform(np.sin(l_*angle_map))
         # kernel_cos = transform(np.cos(l_*angle_map))
         basis.append(kernel)
