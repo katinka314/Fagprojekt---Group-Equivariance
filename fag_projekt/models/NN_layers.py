@@ -83,7 +83,7 @@ def fourier_basis(kernel_size: int, l: int, plot: bool = False) ->  list:
 
 
 class MLP_Radius(nn.Module):
-    def __init__(self, in_features= 1, hidden_units = 16, out_features = 1, bias = False, depth = 1):
+    def __init__(self, in_features= 1, hidden_units = 16, out_features = 1, bias = True, depth = 1):
         super().__init__()
         self.in_features = in_features
         self.out_features = out_features
@@ -188,14 +188,7 @@ class ConvLayer(nn.Module):
                     temp_counter_check.append(basis_idx)
                     kernels.append(self.basis[basis_idx] * radial_weights)
                 
-        
-        """
-        for in_freq in range(-self.l, self.l + 1):
-                MLP_Radius_ = self.frequency_dict[(in_freq, out_freq)]
-                radial_weights = MLP_Radius_(radius_map).squeeze_().reshape(self.k_size,self.k_size)
-                kernels.append(self.basis[in_freq] * radial_weights)
-        kernels = torch.stack(kernels).unsqueeze_(1)
-        """
+
         kernels_tensor = torch.stack(kernels).reshape(self.out_features * (self.len_basis),self.in_features, self.k_size, self.k_size)
         out = F.conv2d(input = x, weight=kernels_tensor) #??? SKAL vi specificerer bias, stride padding???
     
