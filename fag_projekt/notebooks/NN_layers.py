@@ -97,10 +97,7 @@ class ConvLayer(nn.Module):
         # Vi concatenater den på basis-dimensionen, saa self.basis bliver (2l+2, n, n).
         nullkernel = torch.zeros((self.l, self.k_size, self.k_size), dtype=self.basis.dtype)
         self.basis = torch.cat([self.basis, nullkernel], dim=0)
-        self.frequency_dict = {(in_freq, out_freq): [MLP_Radius(bias = self.bias) for _ in range(out_features)] 
-                               for in_freq in range(-l, l + 1) 
-                               for out_freq in range(-l, l + 1)
-                               }
+       
         
         self.basis
     def forward(self, x):
@@ -109,15 +106,17 @@ class ConvLayer(nn.Module):
         radius_map = torch.tensor(self.radius_map).float().flatten().unsqueeze(1)
         
         kernels = []
-        for _ in range(self.out_features):
-            temp_counter_check.append(f'channel: {_}')
+        mlp_count = 0
+        for channel in range(self.out_features):
+            temp_counter_check.append(f'channel: {channel}')
             for out_freq in range(-self.l, self.l + 1):
                 temp_counter_check.append(f'out_freq: {out_freq}')
                 for in_feature in range(self.in_features):
                     in_freq = in_feature%(self.len_basis) - self.l
                     basis_freq = out_freq - in_freq
                     basis_idx = basis_freq + self.l
-                    MLP_Radius_ = MLP_Radius(bias = self.bias)
+                    MLP_Radius_ = self.mlps[mlp_count]
+                    mlp_count += 1
                     radial_weights = MLP_Radius_(radius_map).squeeze_().reshape(self.k_size,self.k_size)
                     temp_counter_check.append(basis_idx)
                     kernels.append(self.basis[basis_idx] * radial_weights)
@@ -132,18 +131,82 @@ class ConvLayer(nn.Module):
         """
         kernels_tensor = torch.stack(kernels).reshape(self.out_features * (self.len_basis),self.in_features, self.k_size, self.k_size)
         out = F.conv2d(input = x, weight=kernels_tensor) #??? SKAL vi specificerer bias, stride padding???
-
+    
         return out
     
     
+class ProjectionLayer(nn.Module):
+    def __init__(self, in_features, out_features, l, bias = True):
+        super().__init__()
+        self.in_features = in_features
+        self.out_features = out_features
+        self.bias = bias
+        self.l = l
+        self.len_basis = l*2 + 1
+        self.lin = nn.Linear(in_features= self.in_features, out_features=self.out_features, bias = self.bias)
+        
+        
+    def forward(self,x):
+        kernel_size = x.shape[-2:]
+        x_invariant = x[:, self.l::self.len_basis,:,:]
+        #F.avg_pool2d(x_invariant, kernel_size)
+        x_pooled = x_invariant.mean(dim = (2,3))
+        x_pooled = torch.real(x_pooled).to(torch.float32)
+        
+        x_flattened = self.lin.forward(x_pooled)
+        #vi kunne evt lave flere lineære lag
+        return x_flattened
+        
+          
+        
+        
+        
+class GroupEquivariantReLU(nn.Module):
+    """
+    Naive norm-gate baseline. Ækvivariant, men degenereret: tager normen over
+    hele (H, W) pr. kanal og nuller kanalen hvis normen er under threshold.
+    Global-lineær pr. kanal (ingen lokal selektivitet) og hård tærskel.
 
+    Til en rigtig, eksakt ækvivariant ikke-linearitet: se NormNonlinearity.
+    """
+    def __init__(self, l, n_samples=None, naive=True, threshold=15):
+        super().__init__()
+        self.l = l
+        self.len_basis = 2 * l + 1
+        self.naive = naive
+        self.threshold = threshold
+
+    def forward(self, x):
+        if self.naive:
+            e_norm = torch.norm(x, dim=(-2, -1))
+            mask = e_norm > self.threshold
+            return x * mask[:, :, None, None]
+
+        return x
     
+
+class NormNonlinearity(nn.Module):
+    """
+        f_out = f * relu(|f| - b) / (|f| + eps)
+    """
+    def __init__(self, num_channels, eps=1e-6):
+        super().__init__()
+        self.bias = nn.Parameter(torch.zeros(num_channels))  # lærbar tærskel pr. kanal
+        self.eps = eps
+
+    def forward(self, x):                       # x: (B, C, H, W) complex
+        m = x.abs()                             # invariant magnitude pr. pixel
+        b = self.bias.view(1, -1, 1, 1)
+        gate = F.relu(m - b) / (m + self.eps)   # ikke-negativ skalering pr. pixel
+        return x * gate.to(x.dtype)
     
+
+
 
 if __name__ == '__main__':
-    path = kagglehub.dataset_download("zalando-research/fashionmnist")
+    path = '/Users/nr1/.cache/kagglehub/datasets/zalando-research/fashionmnist/versions/4'
     df = pd.read_csv(path + '/fashion-mnist_train.csv')
-    num_images = 50
+    num_images = 32
     df_train = df[:num_images]
     rows = df_train.iloc[:, 1:].values
     imgs = rows.reshape(-1, 28,28).astype(np.uint8)
@@ -154,12 +217,15 @@ if __name__ == '__main__':
     # Lifting layer to build against
     l = 2
     ll = LiftingLayer(in_features=10, out_features=10, kernel_size=5, l=l)
-    conv = ConvLayer(in_features=10*(l*2+1), out_features=10, kernel_size=5, l=l)
+    conv = ConvLayer(in_features=10*(l*2+1), out_features=12, kernel_size=5, l=l)
 
+    prøy = ProjectionLayer(in_features=12, out_features=10, l=l)
     # Dummy image so we can develop without downloading a dataset.
     # Shape (batch, channels, height, width), complex to match the Fourier basis.
 
     out = ll.forward(images)
     out2 = conv.forward(out)
+    out3 = prøy.forward(out2)
+    
     print(out.shape)
     print(out[0][7].shape)
