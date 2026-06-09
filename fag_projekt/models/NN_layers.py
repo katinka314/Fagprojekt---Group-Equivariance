@@ -10,9 +10,80 @@ import torch
 import torch.nn as nn
 import torch.nn.functional  as F
 
+from torchvision import transforms
 
 import kagglehub
 import pandas as pd
+
+
+
+
+
+
+""" TODO: Vi skal skrive den med underfunktioner for læsbarhed """
+def fourier_basis(kernel_size: int, l: int, plot: bool = False) ->  list:
+    """ 
+    Input:
+    kernel_size: int: højden/bredden på kernel. 
+    l: hvor høj resulution af basiser du får. er frekvensen af højeste basis.
+    l = 0 giver den konstante funktion ud, l = 1 giver konstant, cosinus og sinus med frkvens = 1
+        
+    Output:
+    1 + 2 * l basisfunktioner (kernels) i størrelse nxn
+    
+    """
+    transform = transforms.ToTensor()
+    n = kernel_size
+    angle_map = np.zeros((n,n)) # maps each position in kernel to an angle.
+    radius_map = np.zeros((n,n)) # maps each position in kernel to an radius
+    center_coords = [-(n - 1)/2 + i for i in range(n)] # the x/y coordinates, when origo is set in the middle of the kernel. #n = 5: fra -2 til 2. n = 6 fra -2,5 til 2,5
+    for x in center_coords:    
+        for y in center_coords:
+            x_idx = int(x + center_coords[-1])
+            y_idx = (n-1) - int(y + center_coords[-1])
+
+            theta = np.arctan2(y,x) #functionen tagerargumenterne ind i den rækkefølge somehow.
+            angle_map[x_idx, y_idx] = theta
+
+            r = np.sqrt(x**2 + y**2)
+            radius_map[x_idx, y_idx] = r
+    radius_map = radius_map/np.max(radius_map)
+    basis = []
+    
+    for l_ in range(-l,l+1):
+        if l_ == 0:
+            kernel = transform(np.ones((n,n)))
+        else:
+            kernel = transform(np.exp(1j* l_*angle_map))
+        # kernel_sin = transform(np.sin(l_*angle_map))
+        # kernel_cos = transform(np.cos(l_*angle_map))
+        basis.append(kernel)
+        # basis.append(kernel_sin)
+        # basis.append(kernel_cos)
+        
+    if plot: # plots the non-constant basis functions
+        #OBS imshow uses rows downwards. We therefore transpose the matrix before plotting.
+        # Complex basis: e^(i*l*theta) = cos(l*theta) + i*sin(l*theta)
+        # -> real part is cos, imag part is sin
+        fig, axes = plt.subplots(2, l, figsize=(3 * l, 6))
+        if l == 1:
+            axes = axes.reshape(2, 1)
+        for l_ in range(1, l + 1):
+            kernel_np = basis[l_].squeeze().numpy().T
+            axes[0, l_ - 1].imshow(kernel_np.real)
+            axes[0, l_ - 1].set_title(f"cos (l={l_})")
+            axes[0, l_ - 1].axis('off')
+            axes[1, l_ - 1].imshow(kernel_np.imag)
+            axes[1, l_ - 1].set_title(f"sin (l={l_})")
+            axes[1, l_ - 1].axis('off')
+        plt.show()
+    basis = torch.stack(basis)
+    basis.squeeze_(1)
+
+    return basis, radius_map
+
+
+
 
 
 class MLP_Radius(nn.Module):
@@ -158,8 +229,6 @@ class ProjectionLayer(nn.Module):
         return x_flattened
         
           
-        
-        
         
 class GroupEquivariantReLU(nn.Module):
     """
