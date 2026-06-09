@@ -24,7 +24,7 @@ from torch import Tensor
 from torchvision import transforms
 
 class NaiveGE_CNN(nn.Module):
-    def __init__(self, kernel_size: int, l: int, in_features: int = 1, img_size: int = 28, n_conv_layers: int = 3, conv_pr_pool: int = 2, channels: int = 16,n_classes:int = 10, bias:bool = True):
+    def __init__(self, kernel_size: int, l: int, in_features: int = 1, img_size: int = 28, MLP_size: int = 4, n_conv_layers: int = 3, conv_pr_pool: int = 2, channels: int = 16,n_classes:int = 10, bias:bool = True):
         super().__init__()
         
         """self.kernel_size = kernel_size
@@ -36,7 +36,7 @@ class NaiveGE_CNN(nn.Module):
         self.n_classes = n_classes
         self.len_basis = 2 * l + 1
 
-        self.layer_sizes = [2**i for i in range(int(np.log2(16)), int(np.log2(16)) + n_conv_layers)]
+        self.layer_sizes = [2**i for i in range(int(np.log2(channels)), int(np.log2(channels)) + n_conv_layers + 1)]
         ls = self.layer_sizes
 
         layers = []
@@ -52,7 +52,7 @@ class NaiveGE_CNN(nn.Module):
         self.model = nn.Sequential(
             LiftingLayer(in_features, ls[0], kernel_size=kernel_size, l=l, bias=bias),
             *layers,
-            ProjectionLayer(ls[3], n_classes, l=l, bias=bias),
+            ProjectionLayer(ls[n_conv_layers], n_classes, l=l, bias=bias),
     )
     
     def forward(self, x):
