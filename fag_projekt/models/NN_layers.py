@@ -53,7 +53,7 @@ def fourier_basis(kernel_size: int, l: int, plot: bool = False) ->  list:
             kernel = transform(np.exp(1j* l_*angle_map))
         # kernel_sin = transform(np.sin(l_*angle_map))
         # kernel_cos = transform(np.cos(l_*angle_map))
-        basis.append(kernel)
+        basis.append(kernel.to(torch.complex64))
         # basis.append(kernel_sin)
         # basis.append(kernel_cos)
         
@@ -142,7 +142,7 @@ class LiftingLayer(nn.Module):
 
     
 class ConvLayer(nn.Module):
-    def __init__(self, in_features, out_features, kernel_size, l,  MLP_size: int = 4, bias=True):
+    def __init__(self, in_features, out_features, kernel_size, l,  MLP_size: int = 4, bias=True, n_rings = 4):
         super(ConvLayer, self).__init__()
         
         # Define learnable parameters
@@ -154,43 +154,55 @@ class ConvLayer(nn.Module):
         self.out_features = out_features
         self.bias = bias
         self.basis, self.radius_map = fourier_basis(kernel_size = self.k_size, l = self.l)
-        t_creating_MLP = time.time()
-        self.mlps = nn.ModuleList([MLP_Radius(bias = self.bias, hidden_units=MLP_size) for _ in range(self.out_features*self.len_basis*self.in_features)])
-        t_creating_MLP = time.time() - t_creating_MLP
+
+        #self.mlps = nn.ModuleList([MLP_Radius(bias = self.bias, hidden_units=MLP_size) for _ in range(self.out_features*self.len_basis*self.in_features)])
+
+        ### project gaussian boy
+        n_rings = self.k_size // 2 + 2 #husk at argumentere for mængde
+        means = torch.linspace(0,1,n_rings,dtype = torch.float32)
+        std = (means[1] - means[0])/2 # Distance between 2 centers
+        r = torch.tensor(self.radius_map, dtype= torch.float32)
+        radials = torch.exp(-(r[None] - means[:, None, None])**2 / (2 * std**2))  # (J, k, k)
+        self.weights = nn.Parameter(torch.randn(4,out_features * self.len_basis * in_features, dtype=torch.float32))
+        radial_weigths = torch.einsum('cp,chw->hwp', self.weights, radials)
+
+
+
         # Null kernel: en (l, n, n) tensor af nuller, der matcher basis i dtype.
         # Vi concatenater den på basis-dimensionen, saa self.basis bliver (2l+2, n, n).
         nullkernel = torch.zeros((self.l, self.k_size, self.k_size), dtype=self.basis.dtype)
         self.basis = torch.cat([self.basis, nullkernel], dim=0)
 
         radius_map = torch.tensor(self.radius_map).float().flatten().unsqueeze(1)
-        t_loop = time.time()
-        kernels = []
-        mlp_count = 0
+
+        idxs = []
+        #mlp_count = 0
         for channel in range(self.out_features):
             for out_freq in range(-self.l, self.l + 1):
                 for in_feature in range(self.in_features):
                     in_freq = in_feature%(self.len_basis) - self.l
                     basis_freq = out_freq - in_freq
                     basis_idx = basis_freq + self.l
-                    MLP_Radius_ = self.mlps[mlp_count]
-                    mlp_count += 1
+                    idxs.append(basis_idx)
+                    #MLP_Radius_ = self.mlps[mlp_count]
+                    #mlp_count += 1
 
-                    radial_weights = MLP_Radius_(radius_map).squeeze_().reshape(self.k_size,self.k_size)
-                    kernels.append(self.basis[basis_idx] * radial_weights)
-        t_loop = time.time() - t_loop  
-        t_stacking = time.time()
-        self.kernels_tensor = torch.stack(kernels).reshape(self.out_features * (self.len_basis),self.in_features, self.k_size, self.k_size)
-        t_stacking = time.time() - t_stacking
-        print(f"time initiating MLPs: {t_creating_MLP}")
-        print(f"time in creating kernels: {t_loop}")
-        print(f"time in stacking kernels: {t_stacking}")
+                    #radial_weights = MLP_Radius_(radius_map).squeeze_().reshape(self.k_size,self.k_size)
+                    #kernels.append(self.basis[basis_idx] * radial_weights)
+        kernels = torch.zeros(self.k_size,self.k_size, out_features * self.len_basis *self.in_features, dtype = torch.complex64)
+        idxs = torch.tensor(idxs)
+        for basis_idx in range(len(self.basis)):
+            mask = (idxs == basis_idx)
+            kernels[:,:,mask] = self.basis[basis_idx][:,:,None] * radial_weigths[:,:,mask] # we do [:,:,None] bc otherwise it is just 1 basis, but we want to make sure the dimentions match in broadcasting.
+
+        self.kernels_tensor = kernels.permute(2,0,1).reshape(self.out_features * (self.len_basis),self.in_features, self.k_size, self.k_size) #måske er dim gale pewrmute?
 
 
     def forward(self, x):
         # x shape: (batch_size, in_features)
 
-        out = F.conv2d(input = x, weight=self.kernels_tensor) 
-    
+        out = F.conv2d(input = x, weight=self.kernels_tensor)
+
         return out
     
     
@@ -268,7 +280,7 @@ if __name__ == '__main__':
     rows = df_train.iloc[:, 1:].values
     imgs = rows.reshape(-1, 28,28).astype(np.uint8)
     images = torch.tensor(imgs, dtype=torch.float32) / 255.0   # (1000, 784)
-    images = images.unsqueeze_(1).to(torch.complex128)
+    images = images.unsqueeze_(1).to(torch.complex64)
 
     
     # Lifting layer to build against
