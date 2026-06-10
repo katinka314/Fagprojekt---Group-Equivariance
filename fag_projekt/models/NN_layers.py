@@ -228,16 +228,15 @@ class ProjectionLayer(nn.Module):
         #vi kunne evt lave flere lineære lag
         return x_flattened
         
-          
-        
-class GroupEquivariantReLU(nn.Module):
-    """
+               
+"""class GroupEquivariantReLU(nn.Module):
+    
     Naive norm-gate baseline. Ækvivariant, men degenereret: tager normen over
     hele (H, W) pr. kanal og nuller kanalen hvis normen er under threshold.
     Global-lineær pr. kanal (ingen lokal selektivitet) og hård tærskel.
 
     Til en rigtig, eksakt ækvivariant ikke-linearitet: se NormNonlinearity.
-    """
+    
     def __init__(self, l, n_samples=None, naive=True, threshold=15):
         super().__init__()
         self.l = l
@@ -251,8 +250,18 @@ class GroupEquivariantReLU(nn.Module):
             mask = e_norm > self.threshold
             return x * mask[:, :, None, None]
 
-        return x
+        return x"""
     
+class ComplexAdaptiveAvgPool2d(nn.Module):
+    """nn.AdaptiveAvgPool2d understoetter ikke complex tensors.
+    Pooling er lineaer, saa vi pooler real- og imaginaerdel hver for sig (samme resultat)."""
+    def __init__(self, output_size):
+        super().__init__()
+        self.pool = nn.AdaptiveAvgPool2d(output_size)
+    def forward(self, x):
+        if x.is_complex():
+            return torch.complex(self.pool(x.real), self.pool(x.imag))
+        return self.pool(x)
 
 class NormNonlinearity(nn.Module):
     """

@@ -47,7 +47,7 @@ class NaiveGE_CNN(nn.Module):
         
             layers.append(NormNonlinearity(ls[i+1]*self.len_basis))
             reduced_size = img_size//(2**(i+1))
-            layers.append(nn.AdaptiveAvgPool2d((reduced_size, reduced_size)))
+            layers.append(ComplexAdaptiveAvgPool2d((reduced_size, reduced_size)))
 
         self.model = nn.Sequential(
             LiftingLayer(in_features, ls[0], kernel_size=kernel_size, l=l, bias=bias),
