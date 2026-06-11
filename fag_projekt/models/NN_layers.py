@@ -225,23 +225,31 @@ class ConvLayer(nn.Module):
     
     
 class ProjectionLayer(nn.Module):
-    def __init__(self, in_features, out_features, l, bias = True):
+    def __init__(self, out_features, l, bias = True):
         super().__init__()
-        self.in_features = in_features
+        self.l = l
         self.out_features = out_features
         self.bias = bias
-        self.l = l
         self.len_basis = l*2 + 1
-        self.lin = nn.Linear(in_features = self.in_features, out_features=self.out_features, bias = self.bias)
+        self.lin = None
         
         
     def forward(self,x):
         #x.shape = antal billeder X kanaler X H X W
-       
+        x_invariant = torch.abs(x).flatten(start_dim=1) # tager normen og laver til array/flattener
+
+        if self.lin is None:
+            self.lin = nn.Linear(
+                x_invariant.shape[1],
+                self.out_features,
+                bias=self.bias
+            ).to(x.device)
+
+        return self.lin(x_invariant)
         #x_invariant = x[:, self.l::self.len_basis,:,:]
         #x_pooled = x_invariant.mean(dim = (2,3))
         #x_pooled = torch.abs(x_pooled).to(torch.float32)
-        x_invariant = torch.abs(x).flatten(start_dim=1) # tager normen og laver til array/flattener
+        
         
         out = self.lin.forward(x_invariant)
         return out

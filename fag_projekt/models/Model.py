@@ -53,7 +53,8 @@ class GE_CNN(nn.Module):
         self.model = nn.Sequential(
             LiftingLayer(in_features, ls[0], kernel_size=kernel_size, l=l, bias=bias),
             *layers,
-            ProjectionLayer(ls[n_conv_layers], n_classes, l=l, bias=bias),
+            ProjectionLayer(out_features=n_classes, l=l, bias=bias),
+
     )
     
         
