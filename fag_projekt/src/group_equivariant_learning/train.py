@@ -5,11 +5,15 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+import os
+from pathlib import Path
 
+print("current dir:", os.getcwd())
 # Add fag_projekt/ to sys.path so 'models' can be imported
 FAG_PROJEKT_DIR = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(FAG_PROJEKT_DIR))
- 
+
+print("current dir:", os.getcwd())
 from models.Model import *
 from group_equivariant_learning.data import RotatedMNIST
 
@@ -71,6 +75,8 @@ def evaluate(model: nn.Module, dataloader: DataLoader) -> tuple[float, float]:
 
 
 if __name__ == "__main__":
+    BASE_DIR = Path(__file__).resolve().parent
+    print(os.getcwd())
     # Fraction of the dataset used for training/evaluation (1.0 = everything).
     TRAIN_FRACTION = 0.1
     TEST_FRACTION = 0.1
@@ -95,6 +101,13 @@ if __name__ == "__main__":
         bias=True,
     )
     
-    model2 = CNN(kernel_size= 5, l = 1, in_features = 1, img_size = 28, n_conv_layers =2, conv_pr_pool = 1, channels = 8, n_classes= 10, bias = True)
+    model2 = CNN(kernel_size= 5, in_features = 1, img_size = 28, n_conv_layers =2, conv_pr_pool = 1, channels = 8, n_classes= 10, bias = True)
 
-    train_loop(model2, alpha=1e-3, dataloader=train_loader, n_epochs=50, test_loader=test_loader)
+    train_loop(model2, alpha=1e-3, dataloader=train_loader, n_epochs=2, test_loader=test_loader)
+    
+    path = os.path.join(BASE_DIR,"..", "models", "model_weights", "model_weights.pth")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    print(__file__)
+    print(Path(__file__))
+    print(os.path.exists(path))
+    torch.save(model2.state_dict(), path)
