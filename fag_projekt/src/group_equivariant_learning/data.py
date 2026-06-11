@@ -5,11 +5,67 @@ import numpy as np
 import torch
 import typer
 from PIL import Image
+from torch.utils.data import Dataset
 from torchvision.transforms.functional import rotate
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATA_DIR = PROJECT_ROOT / "data" / "raw" / "archive"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data" / "processed"
+
+
+class RotatedMNIST(Dataset):
+    """Rotated MNIST dataset loaded from preprocessed .pt files.
+
+    fraction: share of the dataset to use, e.g. 0.1 for 10 %. Selected as a
+    random but reproducible subset (controlled by seed).
+    stratified: if True, the same fraction is drawn from each class, so the
+    label distribution is preserved exactly in the subset.
+    """
+
+    def __init__(
+        self,
+        data_dir: Path = DEFAULT_OUTPUT_DIR,
+        split: str = "train",
+        fraction: float = 1.0,
+        stratified: bool = True,
+        seed: int = 42,
+    ) -> None:
+        if split not in ("train", "test"):
+            raise ValueError(f"split must be 'train' or 'test', got {split!r}")
+        if not 0.0 < fraction <= 1.0:
+            raise ValueError(f"fraction must be in (0, 1], got {fraction!r}")
+
+        data_dir = Path(data_dir)
+        self.images = torch.load(data_dir / f"rotated_{split}_images.pt")
+        self.labels = torch.load(data_dir / f"rotated_{split}_labels.pt")
+        self.angles = torch.load(data_dir / f"rotated_{split}_angles.pt")
+
+        if fraction < 1.0:
+            generator = torch.Generator().manual_seed(seed)
+            if stratified:
+                per_label_indices = []
+                for label in self.labels.unique():
+                    label_idx = (self.labels == label).nonzero(as_tuple=True)[0]
+                    n_label = int(len(label_idx) * fraction)
+                    perm = torch.randperm(len(label_idx), generator=generator)[:n_label]
+                    per_label_indices.append(label_idx[perm])
+                indices = torch.cat(per_label_indices)
+                # Shuffle at the end so the subset is not ordered by class.
+                indices = indices[torch.randperm(len(indices), generator=generator)]
+            else:
+                n_samples = int(len(self.images) * fraction)
+                indices = torch.randperm(len(self.images), generator=generator)[:n_samples]
+            self.images = self.images[indices]
+            self.labels = self.labels[indices]
+            self.angles = self.angles[indices]
+
+    def __len__(self) -> int:
+        return len(self.images)
+
+    def __getitem__(self, idx: int) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        # uint8 [28, 28] -> float32 [1, 28, 28] in [0, 1]
+        image = self.images[idx].unsqueeze(0).float() / 255.0
+        return image, self.labels[idx], self.angles[idx]
 
 
 def load_mnist_images(path: Path) -> torch.Tensor:

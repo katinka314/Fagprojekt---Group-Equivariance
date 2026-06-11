@@ -125,7 +125,11 @@ class LiftingLayer(nn.Module):
          
     def forward(self, x):
         # x shape: (batch_size, in_features)
-       
+        # FIX: the dataset yields float32 but the kernels are complex64, and F.conv2d
+        # refuses to mix dtypes. Remove these two lines for the old behavior (requires complex input).
+        if not x.is_complex():
+            x = x.to(torch.complex64)
+
         radius_map = torch.tensor(self.radius_map).float().flatten().unsqueeze(1)
         kernels = []
         for j in range(self.out_features):
@@ -162,11 +166,14 @@ class ConvLayer(nn.Module):
         means = torch.linspace(0,1,n_rings,dtype = torch.float32)
         std = (means[1] - means[0])/2 # Distance between 2 centers
         r = torch.tensor(self.radius_map, dtype= torch.float32)
-        radials = torch.exp(-(r[None] - means[:, None, None])**2 / (2 * std**2))  # (J, k, k)
-        self.weights = nn.Parameter(torch.randn(4,out_features * self.len_basis * in_features, dtype=torch.float32))
-        radial_weigths = torch.einsum('cp,chw->hwp', self.weights, radials)
-
-
+        self.radials = torch.exp(-(r[None] - means[:, None, None])**2 / (2 * std**2))  # (J, k, k)
+        # Kaiming-style scaling by 1/sqrt(fan_in): one output pixel is a sum of
+        # in_features * k^2 products, so without scaling the activations grow by
+        # ~sqrt(fan_in) per layer and the logits end up around 1e8.
+        init_scale = (in_features * kernel_size**2) ** -0.5
+        self.weights = nn.Parameter(init_scale * torch.randn(n_rings, out_features * self.len_basis * in_features, dtype=torch.float32))
+        # OLD version (unscaled init, and hardcoded 4 instead of n_rings, same value for kernel_size=5):
+        # self.weights = nn.Parameter(torch.randn(4,out_features * self.len_basis * in_features, dtype=torch.float32))
 
         # Null kernel: en (l, n, n) tensor af nuller, der matcher basis i dtype.
         # Vi concatenater den på basis-dimensionen, saa self.basis bliver (2l+2, n, n).
@@ -189,19 +196,33 @@ class ConvLayer(nn.Module):
 
                     #radial_weights = MLP_Radius_(radius_map).squeeze_().reshape(self.k_size,self.k_size)
                     #kernels.append(self.basis[basis_idx] * radial_weights)
-        kernels = torch.zeros(self.k_size,self.k_size, out_features * self.len_basis *self.in_features, dtype = torch.complex64)
-        idxs = torch.tensor(idxs)
+        self.idxs = torch.tensor(idxs)
+
+        # OLD version (kernels built once in __init__). Crashed on the second backward call,
+        # because the autograd graph from self.weights was consumed by the first batch:
+        # radial_weigths = torch.einsum('cp,chw->hwp', self.weights, self.radials)
+        # kernels = torch.zeros(self.k_size,self.k_size, out_features * self.len_basis *self.in_features, dtype = torch.complex64)
+        # for basis_idx in range(len(self.basis)):
+        #     mask = (self.idxs == basis_idx)
+        #     kernels[:,:,mask] = self.basis[basis_idx][:,:,None] * radial_weigths[:,:,mask]
+        # self.kernels_tensor = kernels.permute(2,0,1).reshape(self.out_features * (self.len_basis),self.in_features, self.k_size, self.k_size)
+
+    def build_kernels(self):
+        # The kernels must be rebuilt on every forward call (not in __init__), so the
+        # autograd graph from self.weights is fresh for each batch.
+        radial_weigths = torch.einsum('cp,chw->hwp', self.weights, self.radials)
+        kernels = torch.zeros(self.k_size, self.k_size, self.out_features * self.len_basis * self.in_features, dtype = torch.complex64)
         for basis_idx in range(len(self.basis)):
-            mask = (idxs == basis_idx)
+            mask = (self.idxs == basis_idx)
             kernels[:,:,mask] = self.basis[basis_idx][:,:,None] * radial_weigths[:,:,mask] # we do [:,:,None] bc otherwise it is just 1 basis, but we want to make sure the dimentions match in broadcasting.
 
-        self.kernels_tensor = kernels.permute(2,0,1).reshape(self.out_features * (self.len_basis),self.in_features, self.k_size, self.k_size) #måske er dim gale pewrmute?
-
+        return kernels.permute(2,0,1).reshape(self.out_features * (self.len_basis),self.in_features, self.k_size, self.k_size) #måske er dim gale pewrmute?
 
     def forward(self, x):
         # x shape: (batch_size, in_features)
 
-        out = F.conv2d(input = x, weight=self.kernels_tensor)
+        out = F.conv2d(input = x, weight=self.build_kernels())
+        # OLD version: out = F.conv2d(input = x, weight=self.kernels_tensor)
 
         return out
     
@@ -263,19 +284,32 @@ class ComplexAdaptiveAvgPool2d(nn.Module):
             return torch.complex(self.pool(x.real), self.pool(x.imag))
         return self.pool(x)
 
+class ComplexAdaptiveAvgPool2d(nn.Module):
+    """nn.AdaptiveAvgPool2d does not support complex tensors.
+    Pooling is linear, so we pool the real and imaginary parts separately (same result)."""
+    def __init__(self, output_size):
+        super().__init__()
+        self.pool = nn.AdaptiveAvgPool2d(output_size)
+
+    def forward(self, x):
+        if x.is_complex():
+            return torch.complex(self.pool(x.real), self.pool(x.imag))
+        return self.pool(x)
+
+
 class NormNonlinearity(nn.Module):
     """
         f_out = f * relu(|f| - b) / (|f| + eps)
     """
     def __init__(self, num_channels, eps=1e-6):
         super().__init__()
-        self.bias = nn.Parameter(torch.zeros(num_channels))  # lærbar tærskel pr. kanal
+        self.bias = nn.Parameter(0.3 * torch.ones(num_channels))  
         self.eps = eps
 
     def forward(self, x):                       # x: (B, C, H, W) complex
-        m = x.abs()                             # invariant magnitude pr. pixel
+        m = x.abs()                             
         b = self.bias.view(1, -1, 1, 1)
-        gate = F.relu(m - b) / (m + self.eps)   # ikke-negativ skalering pr. pixel
+        gate = F.relu(m - b) / (m + self.eps)  
         return x * gate.to(x.dtype)
     
 
