@@ -16,7 +16,7 @@ sys.path.insert(0, str(FAG_PROJEKT_DIR))
 
 print("current dir:", os.getcwd())
 from models.Model import *
-from src.group_equivariant_learning.data import RotatedMNIST
+from src.data import RotatedMNIST
 
 
 def train_loop(model: nn.Module, lr: float, dataloader: DataLoader, n_epochs: int, test_loader: DataLoader | None = None) -> list[float]:
