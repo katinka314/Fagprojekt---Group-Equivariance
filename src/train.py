@@ -31,7 +31,7 @@ def train_loop(model: nn.Module, lr: float, train_loader: DataLoader, n_epochs: 
         total_loss = 0.0
         n_seen = 0
 
-        progress = tqdm(dataloader, desc=f"Epoch {epoch + 1}/{n_epochs}")
+        progress = tqdm(train_loader, desc=f"Epoch {epoch + 1}/{n_epochs}")
         for images, labels, angles in progress:
             optimizer.zero_grad()
             logits = model(images)
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     
     model2 = CNN(kernel_size= 5, in_features = 1, img_size = 28, n_conv_layers =2, conv_pr_pool = 1, channels = 8, n_classes= 10, bias = True)
 
-    train_loop(model2, lr=1e-3, train_loader=train_loader, n_epochs=2, test_loader=test_loader)
+    train_loop(model2, lr=1e-3, train_loader=train_loader, n_epochs=10, test_loader=test_loader)
     
     BASE_DIR = Path(__file__).resolve().parent
     path = os.path.join(BASE_DIR, "..", "models", "model_weights", "model_weights.pth")
