@@ -16,7 +16,7 @@ from models.Model import *
 from src.data import RotatedMNIST
 
 
-def train_loop(model: nn.Module, lr: float, dataloader: DataLoader, n_epochs: int, test_loader: DataLoader | None = None) -> list[float]:
+def train_loop(model: nn.Module, lr: float, train_loader: DataLoader, n_epochs: int, test_loader: DataLoader | None = None) -> list[float]:
     """Train the model and return the average loss per epoch. alpha is the learning rate.
 
     If test_loader is given, the model is evaluated on it after every epoch.
@@ -79,8 +79,8 @@ if __name__ == "__main__":
     TRAIN_FRACTION = 0.1
     TEST_FRACTION = 0.1
 
-    train_dataset = RotatedMNIST(split="train", fraction=TRAIN_FRACTION)
-    test_dataset = RotatedMNIST(split="test", fraction=TEST_FRACTION)
+    train_dataset = RotatedMNIST(split="train", rotated=True,  fraction=TRAIN_FRACTION)
+    test_dataset = RotatedMNIST(split="test", rotated= True, fraction=TEST_FRACTION)
 
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     
     model2 = CNN(kernel_size= 5, in_features = 1, img_size = 28, n_conv_layers =2, conv_pr_pool = 1, channels = 8, n_classes= 10, bias = True)
 
-    train_loop(model2, lr=1e-3, dataloader=train_loader, n_epochs=2, test_loader=test_loader)
+    train_loop(model2, lr=1e-3, train_loader=train_loader, n_epochs=2, test_loader=test_loader)
     
     BASE_DIR = Path(__file__).resolve().parent
     path = os.path.join(BASE_DIR, "..", "models", "model_weights", "model_weights.pth")

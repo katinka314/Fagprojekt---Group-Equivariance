@@ -15,30 +15,40 @@ DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data" / "processed"
 
 class RotatedMNIST(Dataset):
     """Rotated MNIST dataset loaded from preprocessed .pt files.
-
-    fraction: share of the dataset to use, e.g. 0.1 for 10 %. Selected as a
-    random but reproducible subset (controlled by seed).
-    stratified: if True, the same fraction is drawn from each class, so the
-    label distribution is preserved exactly in the subset.
+    Normally: Just specify split, and rotated
+    
+    Parameters 
+    ----------
+    Returns: 
+        image, self.labels[idx], self.angles[idx]
+    split: str
+        "train" "test"
+    rotated:
+        True False
+  
+    stratified: 
+        True False
+    Ex:
+    train_set = RotatedMNIST(split="train", rotated=True)  
+        (train on rotated)
+    test_set  = RotatedMNIST(split="test",  rotated=False)  
+        (test on normal)
     """
 
-    def __init__(
-        self,
-        data_dir: Path = DEFAULT_OUTPUT_DIR,
-        split: str = "train",
-        fraction: float = 1.0,
-        stratified: bool = True,
-        seed: int = 42,
-    ) -> None:
+    def __init__(self, data_dir: Path = DEFAULT_OUTPUT_DIR, split: str = "train", rotated: bool = True, fraction: float = 1.0, stratified: bool = True, seed: int = 42) -> None:
         if split not in ("train", "test"):
-            raise ValueError(f"split must be 'train' or 'test', got {split!r}")
+            raise ValueError(f"split must be 'train' or 'test'")
         if not 0.0 < fraction <= 1.0:
-            raise ValueError(f"fraction must be in (0, 1], got {fraction!r}")
+            raise ValueError(f"fraction must be in (0, 1]")
+        prefix = 'rotated_' if rotated else ''
 
         data_dir = Path(data_dir)
-        self.images = torch.load(data_dir / f"rotated_{split}_images.pt")
-        self.labels = torch.load(data_dir / f"rotated_{split}_labels.pt")
-        self.angles = torch.load(data_dir / f"rotated_{split}_angles.pt")
+        self.images = torch.load(data_dir / f"{prefix}{split}_images.pt")
+        self.labels = torch.load(data_dir / f"{prefix}{split}_labels.pt")
+        if rotated:
+            self.angles = torch.load(data_dir / f"{prefix}{split}_angles.pt")
+        else:
+            self.angles = torch.zeros(len(self.images), dtype= torch.float32)
 
         if fraction < 1.0:
             generator = torch.Generator().manual_seed(seed)
@@ -68,16 +78,15 @@ class RotatedMNIST(Dataset):
         return image, self.labels[idx], self.angles[idx]
 
 
-def load_mnist_images(path: Path) -> torch.Tensor:
+def load_mnist_images(path: Path) -> torch.Tensor: 
     """Load MNIST images from an IDX file."""
     with open(path, "rb") as f:
         data = f.read()
 
-    images = np.frombuffer(data, dtype=np.uint8, offset=16).copy()
-    images = torch.from_numpy(images).reshape(-1, 28, 28)
+    images = np.frombuffer(data, dtype=np.uint8, offset=16).copy() #Returns images as 1D arrays of len N*784
+    images = torch.from_numpy(images).reshape(-1, 28, 28) # Transforms into torch 28x 28 images 
 
-    return images
-
+    return images # (i x r x c) #range 0, 255
 
 def load_mnist_labels(path: Path) -> torch.Tensor:
     """Load MNIST labels from an IDX file."""
@@ -113,41 +122,26 @@ def rotate_dataset(images: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
     return rotated_images, angles
 
 
-def preprocess_split(
-    image_path: Path,
-    label_path: Path,
-    output_image_path: Path,
-    output_label_path: Path,
-    output_angle_path: Path,
-) -> None:
-    """Load one split, rotate all images randomly, and save images, labels, and angles."""
-    print(f"Loading images from {image_path}")
-    images = load_mnist_images(image_path)
+def preprocess_split(image_path: Path, label_path: Path, output_dir: Path, split: str) -> None:
+    """Load one split, save plain images, rotated images, angles, and shared labels."""
 
-    print(f"Loading labels from {label_path}")
+    images = load_mnist_images(image_path)
     labels = load_mnist_labels(label_path)
 
-    print("Rotating images with one random angle per image")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    torch.save(images, output_dir / f"{split}_images.pt")
     rotated_images, angles = rotate_dataset(images)
+    torch.save(rotated_images, output_dir / f"rotated_{split}_images.pt")
+    torch.save(angles, output_dir / f"rotated_{split}_angles.pt")
+    torch.save(labels, output_dir / f"{split}_labels.pt")
 
-    output_image_path.parent.mkdir(parents=True, exist_ok=True)
-
-    print(f"Saving rotated images to {output_image_path}")
-    torch.save(rotated_images, output_image_path)
-
-    print(f"Saving labels to {output_label_path}")
-    torch.save(labels, output_label_path)
-
-    print(f"Saving rotation angles to {output_angle_path}")
-    torch.save(angles, output_angle_path)
+    print('All images are proccessed')
 
 
-def preprocess(
-    data_dir: Path = DEFAULT_DATA_DIR,
-    output_dir: Path = DEFAULT_OUTPUT_DIR,
-    seed: int = 42,
-) -> None:
-    """Create a fixed rotated MNIST dataset and save it to disk."""
+
+def preprocess(data_dir: Path = DEFAULT_DATA_DIR, output_dir: Path = DEFAULT_OUTPUT_DIR, seed: int = 42) -> None:
+    """Create a fixed and, rotated MNIST dataset and save it to disk."""
     random.seed(seed)
     torch.manual_seed(seed)
 
@@ -156,19 +150,17 @@ def preprocess(
     print(f"Using output directory: {output_dir}")
 
     preprocess_split(
-        image_path=data_dir / "train-images.idx3-ubyte",
-        label_path=data_dir / "train-labels.idx1-ubyte",
-        output_image_path=output_dir / "rotated_train_images.pt",
-        output_label_path=output_dir / "rotated_train_labels.pt",
-        output_angle_path=output_dir / "rotated_train_angles.pt",
+    image_path=data_dir / "train-images.idx3-ubyte",
+    label_path=data_dir / "train-labels.idx1-ubyte",
+    output_dir=output_dir,
+    split="train",
     )
 
     preprocess_split(
         image_path=data_dir / "t10k-images.idx3-ubyte",
         label_path=data_dir / "t10k-labels.idx1-ubyte",
-        output_image_path=output_dir / "rotated_test_images.pt",
-        output_label_path=output_dir / "rotated_test_labels.pt",
-        output_angle_path=output_dir / "rotated_test_angles.pt",
+        output_dir=output_dir,
+        split="test",
     )
 
 
