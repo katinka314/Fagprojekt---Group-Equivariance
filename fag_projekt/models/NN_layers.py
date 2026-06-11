@@ -79,9 +79,6 @@ def fourier_basis(kernel_size: int, l: int, plot: bool = False) ->  list:
     return basis, radius_map
 
 
-
-
-
 class MLP_Radius(nn.Module):
     def __init__(self, in_features= 1, hidden_units = 16, out_features = 1, bias = True, depth = 1):
         super().__init__()
@@ -235,21 +232,19 @@ class ProjectionLayer(nn.Module):
         self.bias = bias
         self.l = l
         self.len_basis = l*2 + 1
-        self.lin = nn.Linear(in_features= self.in_features, out_features=self.out_features, bias = self.bias)
+        self.lin = nn.Linear(in_features = self.in_features, out_features=self.out_features, bias = self.bias)
         
         
     def forward(self,x):
-        kernel_size = x.shape[-2:]
-        x_invariant = x[:, self.l::self.len_basis,:,:]
-        #F.avg_pool2d(x_invariant, kernel_size)
-        x_pooled = x_invariant.mean(dim = (2,3))
-        x_pooled = torch.real(x_pooled).to(torch.float32)
+        #x.shape = antal billeder X kanaler X H X W
+       
+        #x_invariant = x[:, self.l::self.len_basis,:,:]
+        #x_pooled = x_invariant.mean(dim = (2,3))
+        #x_pooled = torch.abs(x_pooled).to(torch.float32)
+        x_invariant = torch.abs(x).flatten(start_dim=1) # tager normen og laver til array/flattener
         
-        x_flattened = self.lin.forward(x_pooled)
-        #vi kunne evt lave flere lineære lag
-        return x_flattened
-        
-               
+        out = self.lin.forward(x_invariant)
+        return out
 """class GroupEquivariantReLU(nn.Module):
     
     Naive norm-gate baseline. Ækvivariant, men degenereret: tager normen over
@@ -316,7 +311,8 @@ class NormNonlinearity(nn.Module):
 
 
 if __name__ == '__main__':
-    path = '/Users/nr1/.cache/kagglehub/datasets/zalando-research/fashionmnist/versions/4'
+    #path = '/Users/nr1/.cache/kagglehub/datasets/zalando-research/fashionmnist/versions/4'
+    path = kagglehub.dataset_download("zalando-research/fashionmnist")
     df = pd.read_csv(path + '/fashion-mnist_train.csv')
     num_images = 32
     df_train = df[:num_images]
