@@ -87,7 +87,8 @@ if __name__ == "__main__":
     TRAIN_FRACTION = 0.01
     TEST_FRACTION = 0.01
 
-    train_dataset = RotatedMNIST(split="train", rotated=False,  fraction=TRAIN_FRACTION)
+    MODEL = "CNN"
+    train_dataset = RotatedMNIST(split="train", rotated=True,  fraction=TRAIN_FRACTION)
     test_dataset = RotatedMNIST(split="test", rotated= True, fraction=TEST_FRACTION)
 
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
@@ -95,28 +96,37 @@ if __name__ == "__main__":
 
     # n_conv_layers=3 does not work with kernel_size=5 on 28x28: the feature maps
     # shrink to 3x3 before the last block (convs have no padding), too small for a 5x5 kernel.
-    GE_CNN_model = GE_CNN(
-        kernel_size=5,
-        l=2,
-        in_features=1,
-        img_size=28,
-        n_conv_layers=2,
-        conv_pr_pool=1,
-        channels=8,
-        n_classes=10,
-        bias=True,
-    )
-    GE_CNN_model.name = "GE_CNN"
     
-    CNN_model = CNN(kernel_size= 5, 
-        in_features = 1, 
-        img_size = 28, 
-        n_conv_layers =2, 
-        conv_pr_pool = 1, 
-        channels = 8, 
-        n_classes= 10, 
-        bias = True)
-    CNN_model.name = "CNN"
+    if MODEL == "CNN":
+        model_args = {
+            "kernel_size": 5,
+            "in_features": 1,
+            "img_size": 28,
+            "n_conv_layers": 2,
+            "conv_pr_pool": 1,
+            "channels": 8,
+            "n_classes": 10,
+            "bias": True,
+        }
+        CNN_model = CNN(**model_args)
+        CNN_model.name = "CNN"
+        current_model = CNN_model
+    elif MODEL == "GE_CNN":
+        model_args = {
+            "kernel_size": 5,
+            "l": 1,
+            "in_features": 1,
+            "img_size": 28,
+            "n_conv_layers": 2,
+            "conv_pr_pool": 1,
+            "channels": 8,
+            "n_classes": 10,
+            "bias": True,
+        }
+        GE_CNN_model = GE_CNN(**model_args)
+        GE_CNN_model.name = "GE_CNN"
+        current_model = GE_CNN
+    
 
     model_specifications = "_" # string indicating parameters of model (is just used to uniquely identify the model weights file)
     current_model = CNN_model # choose CNN:model or GE_CNN_model
@@ -124,6 +134,12 @@ if __name__ == "__main__":
     
     #SAVE the model weights
     BASE_DIR = Path(__file__).resolve().parents[1] # home directory (Fagprojekt---GE)
-    path = os.path.join(BASE_DIR, "models", "model_weights", f"{current_model.name}_model_weights{model_specifications}.pth")
-   
-    torch.save(current_model.state_dict(), path)
+    save_path = os.path.join(BASE_DIR, "models", "model_weights", f"{current_model.name}_model_weights{model_specifications}.pth")
+    
+    model_state = {
+        "model_name": current_model.name,
+        "model_args": model_args,
+        "state_dict": current_model.state_dict(),
+    }
+
+    torch.save(model_state, save_path)
