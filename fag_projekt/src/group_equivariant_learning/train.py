@@ -11,20 +11,21 @@ from pathlib import Path
 print("current dir:", os.getcwd())
 # Add fag_projekt/ to sys.path so 'models' can be imported
 FAG_PROJEKT_DIR = Path(__file__).resolve().parents[2]
+
 sys.path.insert(0, str(FAG_PROJEKT_DIR))
 
 print("current dir:", os.getcwd())
 from models.Model import *
-from group_equivariant_learning.data import RotatedMNIST
+from src.group_equivariant_learning.data import RotatedMNIST
 
 
-def train_loop(model: nn.Module, alpha: float, dataloader: DataLoader, n_epochs: int, test_loader: DataLoader | None = None) -> list[float]:
+def train_loop(model: nn.Module, lr: float, dataloader: DataLoader, n_epochs: int, test_loader: DataLoader | None = None) -> list[float]:
     """Train the model and return the average loss per epoch. alpha is the learning rate.
 
     If test_loader is given, the model is evaluated on it after every epoch.
     """
-    print('Training model: ', model)
-    optimizer = torch.optim.Adam(model.parameters(), lr=alpha)
+    #print('Training model: ', model)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
 
     epoch_losses = []
