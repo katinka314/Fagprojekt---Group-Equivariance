@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
     # n_conv_layers=3 does not work with kernel_size=5 on 28x28: the feature maps
     # shrink to 3x3 before the last block (convs have no padding), too small for a 5x5 kernel.
-    model = GE_CNN(
+    GE_CNN_model = GE_CNN(
         kernel_size=5,
         l=1,
         in_features=1,
@@ -98,15 +98,24 @@ if __name__ == "__main__":
         n_classes=10,
         bias=True,
     )
+    GE_CNN_model.name = "GE_CNN"
     
-    model2 = CNN(kernel_size= 5, in_features = 1, img_size = 28, n_conv_layers =2, conv_pr_pool = 1, channels = 8, n_classes= 10, bias = True)
+    CNN_model = CNN(kernel_size= 5, 
+        in_features = 1, 
+        img_size = 28, 
+        n_conv_layers =2, 
+        conv_pr_pool = 1, 
+        channels = 8, 
+        n_classes= 10, 
+        bias = True)
+    CNN_model.name = "CNN"
 
-    train_loop(model2, lr=1e-3, train_loader=train_loader, n_epochs=2, test_loader=test_loader)
+    model_specifications = "_" # string indicating parameters of model (is just used to uniquely identify the model weights file)
+    current_model = CNN_model # choose CNN:model or GE_CNN_model
+    train_loop(current_model, lr=1e-3, train_loader=train_loader, n_epochs=2, test_loader=test_loader)
     
-    BASE_DIR = Path(__file__).resolve().parent
-    path = os.path.join(BASE_DIR, "..", "models", "model_weights", "model_weights.pth")
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    print(__file__)
-    print(Path(__file__))
-    print(os.path.exists(path))
-    torch.save(model2.state_dict(), path)
+    #SAVE the model weights
+    BASE_DIR = Path(__file__).resolve().parents[1] # home directory (Fagprojekt---GE)
+    path = os.path.join(BASE_DIR, "models", "model_weights", f"{current_model.name}_model_weights{model_specifications}.pth")
+   
+    torch.save(current_model.state_dict(), path)
