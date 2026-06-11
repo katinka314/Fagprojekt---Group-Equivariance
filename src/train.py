@@ -104,7 +104,7 @@ if __name__ == "__main__":
     
     model2 = CNN(kernel_size= 5, in_features = 1, img_size = 28, n_conv_layers =2, conv_pr_pool = 1, channels = 8, n_classes= 10, bias = True)
 
-    train_loop(model2, alpha=1e-3, dataloader=train_loader, n_epochs=2, test_loader=test_loader)
+    train_loop(model2, lr=1e-3, dataloader=train_loader, n_epochs=2, test_loader=test_loader)
     
     path = os.path.join(BASE_DIR,"..", "models", "model_weights", "model_weights.pth")
     os.makedirs(os.path.dirname(path), exist_ok=True)
