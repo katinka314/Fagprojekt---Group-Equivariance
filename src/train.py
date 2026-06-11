@@ -8,13 +8,10 @@ from tqdm import tqdm
 import os
 from pathlib import Path
 
-print("current dir:", os.getcwd())
-# Add fag_projekt/ to sys.path so 'models' can be imported
-FAG_PROJEKT_DIR = Path(__file__).resolve().parents[2]
-
+# Change import path to a level up (from src -> Fagprojekt) so 'models' can be imported
+FAG_PROJEKT_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(FAG_PROJEKT_DIR))
 
-print("current dir:", os.getcwd())
 from models.Model import *
 from src.data import RotatedMNIST
 
@@ -76,8 +73,8 @@ def evaluate(model: nn.Module, dataloader: DataLoader) -> tuple[float, float]:
 
 
 if __name__ == "__main__":
-    BASE_DIR = Path(__file__).resolve().parent
-    print(os.getcwd())
+    
+    #os.chdir("Fagprojekt---Group-Equivariance")
     # Fraction of the dataset used for training/evaluation (1.0 = everything).
     TRAIN_FRACTION = 0.01
     TEST_FRACTION = 0.01
@@ -106,7 +103,8 @@ if __name__ == "__main__":
 
     train_loop(model2, lr=1e-3, train_loader=train_loader, n_epochs=2, test_loader=test_loader)
     
-    path = os.path.join(BASE_DIR,"..", "models", "model_weights", "model_weights.pth")
+    BASE_DIR = Path(__file__).resolve().parent
+    path = os.path.join(BASE_DIR, "..", "models", "model_weights", "model_weights.pth")
     os.makedirs(os.path.dirname(path), exist_ok=True)
     print(__file__)
     print(Path(__file__))
