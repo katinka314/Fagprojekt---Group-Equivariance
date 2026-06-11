@@ -31,7 +31,7 @@ def train_loop(model: nn.Module, lr: float, train_loader: DataLoader, n_epochs: 
         total_loss = 0.0
         n_seen = 0
 
-        progress = tqdm(dataloader, desc=f"Epoch {epoch + 1}/{n_epochs}")
+        progress = tqdm(train_loader, desc=f"Epoch {epoch + 1}/{n_epochs}")
         for images, labels, angles in progress:
             optimizer.zero_grad()
             logits = model(images)
