@@ -8,7 +8,7 @@ from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.transforms.functional import rotate
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DATA_DIR = PROJECT_ROOT / "data" / "raw" / "archive"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data" / "processed"
 
