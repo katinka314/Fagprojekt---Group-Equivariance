@@ -8,19 +8,20 @@ from tqdm import tqdm
 
 # Add fag_projekt/ to sys.path so 'models' can be imported
 FAG_PROJEKT_DIR = Path(__file__).resolve().parents[2]
+
 sys.path.insert(0, str(FAG_PROJEKT_DIR))
  
 from models.Model import *
-from group_equivariant_learning.data import RotatedMNIST
+from src.group_equivariant_learning.data import RotatedMNIST
 
 
-def train_loop(model: nn.Module, alpha: float, dataloader: DataLoader, n_epochs: int, test_loader: DataLoader | None = None) -> list[float]:
+def train_loop(model: nn.Module, lr: float, dataloader: DataLoader, n_epochs: int, test_loader: DataLoader | None = None) -> list[float]:
     """Train the model and return the average loss per epoch. alpha is the learning rate.
 
     If test_loader is given, the model is evaluated on it after every epoch.
     """
-    print('Training model: ', model)
-    optimizer = torch.optim.Adam(model.parameters(), lr=alpha)
+    #print('Training model: ', model)
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
 
     epoch_losses = []
@@ -95,6 +96,6 @@ if __name__ == "__main__":
         bias=True,
     )
     
-    model2 = CNN(kernel_size= 5, l = 1, in_features = 1, img_size = 28, n_conv_layers =2, conv_pr_pool = 1, channels = 8, n_classes= 10, bias = True)
+    model2 = CNN(kernel_size= 5, in_features = 1, img_size = 28, n_conv_layers =2, conv_pr_pool = 1, channels = 8, n_classes= 10, bias = True)
 
-    train_loop(model2, alpha=1e-3, dataloader=train_loader, n_epochs=50, test_loader=test_loader)
+    train_loop(model2, lr=1e-3, dataloader=train_loader, n_epochs=50, test_loader=test_loader)
