@@ -79,8 +79,8 @@ if __name__ == "__main__":
     BASE_DIR = Path(__file__).resolve().parent
     print(os.getcwd())
     # Fraction of the dataset used for training/evaluation (1.0 = everything).
-    TRAIN_FRACTION = 0.1
-    TEST_FRACTION = 0.1
+    TRAIN_FRACTION = 0.01
+    TEST_FRACTION = 0.01
 
     train_dataset = RotatedMNIST(split="train", rotated=True,  fraction=TRAIN_FRACTION)
     test_dataset = RotatedMNIST(split="test", rotated= True, fraction=TEST_FRACTION)
