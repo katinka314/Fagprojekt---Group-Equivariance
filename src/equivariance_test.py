@@ -87,7 +87,7 @@ def plot_feature_grid(x_list, channel):
     plt.show()
 
 #LOAD MODEL WEIGHTS ========================================================
-model_weights_path = Path(__file__).resolve().parents[1] / "models" / "model_weights" / "CNN_model_weights_.pth"
+model_weights_path = Path(__file__).resolve().parents[1] / "models" / "model_weights" / "GE_CNN_model_weights_.pth"
 model_weights = torch.load(model_weights_path)
 #model_weights = torch.load("models/model_weights/CNN_model_weights_.pth")
 
@@ -97,12 +97,16 @@ if model_weights["model_name"] == "CNN":
     model = CNN(**model_weights["model_args"])
 elif model_weights["model_name"] == "GE_CNN":
     model = GE_CNN(**model_weights["model_args"])
+model.name = model_weights["model_name"]
 
 model.load_state_dict(model_weights["state_dict"])
 print("---Loaded model---")
 
 # MAKE PARTIAL MODEL (only layers up until some target layer) ================
-layers = list(model.model.children()) #get all layers in model
+if model.name == "CNN":
+    layers = list(model.features.children())
+if model.name == "GE_CNN":
+    layers = list(model.model.children()) #get all layers in model
 target_layer = min(7, len(layers)) #choose target layer
 partial_model = nn.Sequential(*layers[:target_layer])
 print("Partial model:")
