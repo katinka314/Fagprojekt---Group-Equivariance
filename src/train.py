@@ -128,11 +128,12 @@ if __name__ == "__main__":
         current_model = GE_CNN_model
     
 
-    model_specifications = "_" # string indicating parameters of model (is just used to uniquely identify the model weights file)
+    
     train_loop(current_model, lr=1e-3, train_loader=train_loader, n_epochs=2, test_loader=test_loader)
     
     #SAVE the model weights
     BASE_DIR = Path(__file__).resolve().parents[1] # home directory (Fagprojekt---GE)
+    model_specifications = "_" # string indicating parameters of model (is just used to uniquely identify the model weights file)
     save_path = os.path.join(BASE_DIR, "models", "model_weights", f"{current_model.name}_model_weights{model_specifications}.pth")
     
     model_state = {
