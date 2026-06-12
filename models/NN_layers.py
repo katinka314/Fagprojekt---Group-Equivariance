@@ -159,7 +159,8 @@ class ConvLayer(nn.Module):
         #self.mlps = nn.ModuleList([MLP_Radius(bias = self.bias, hidden_units=MLP_size) for _ in range(self.out_features*self.len_basis*self.in_features)])
 
         ### project gaussian boy
-        n_rings = self.k_size // 2 + 2 #husk at argumentere for mængde
+        # slettede den følgende
+        #n_rings = self.k_size // 2 + 2 #husk at argumentere for mængde
         means = torch.linspace(0,1,n_rings,dtype = torch.float32)
         std = (means[1] - means[0])/2 # Distance between 2 centers
         r = torch.tensor(self.radius_map, dtype= torch.float32)
