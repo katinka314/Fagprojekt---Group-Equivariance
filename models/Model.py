@@ -96,6 +96,9 @@ class CNN(nn.Module):
     def forward(self, x):
         x = self.features(x)
         x = x.flatten(start_dim = 1)
+        dummy_x = torch.randn_like(x)
+        self.classifier(dummy_x)
+        self.classifier(x)
         return self.classifier(x)
 
     # GAMMEL version (LeNet-boilerplate til CIFAR): virkede ikke paa MNIST, da

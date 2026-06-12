@@ -240,7 +240,8 @@ class ProjectionLayer(nn.Module):
     def forward(self,x):
         #x.shape = antal billeder X kanaler X H X W
         x_invariant = torch.abs(x).flatten(start_dim=1) # tager normen og laver til array/flattener
-
+        dummy_x = torch.randn_like(x_invariant)
+        self.lin(dummy_x)
         return self.lin(x_invariant)
         #x_invariant = x[:, self.l::self.len_basis,:,:]
         #x_pooled = x_invariant.mean(dim = (2,3))
