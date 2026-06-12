@@ -50,12 +50,12 @@ def fourier_basis(kernel_size: int, l: int, plot: bool = False) ->  list:
         if l_ == 0:
             kernel = transform(np.ones((n,n)))
         else:
-            kernel = transform(np.exp(1j* l_*angle_map))
-        # kernel_sin = transform(np.sin(l_*angle_map))
-        # kernel_cos = transform(np.cos(l_*angle_map))
+            harmonic = transform(np.exp(1j* l_*angle_map))
+        #I center are they undefined, we set them to 0
+        harmonic[n // 2, n//2] = 0
+        kernel = transform(harmonic)
         basis.append(kernel.to(torch.complex64))
-        # basis.append(kernel_sin)
-        # basis.append(kernel_cos)
+        
         
     if plot: # plots the non-constant basis functions
         #OBS imshow uses rows downwards. We therefore transpose the matrix before plotting.
@@ -231,10 +231,7 @@ class ProjectionLayer(nn.Module):
         self.out_features = out_features
         self.bias = bias
         self.len_basis = l*2 + 1
-        self.lin = nn.LazyLinear(
-                self.out_features,
-                bias=self.bias
-            )
+        self.lin = nn.LazyLinear(self.out_features, bias=self.bias)
         
         
     def forward(self,x):
@@ -242,13 +239,7 @@ class ProjectionLayer(nn.Module):
         x_invariant = torch.abs(x).flatten(start_dim=1) # tager normen og laver til array/flattener
 
         return self.lin(x_invariant)
-        #x_invariant = x[:, self.l::self.len_basis,:,:]
-        #x_pooled = x_invariant.mean(dim = (2,3))
-        #x_pooled = torch.abs(x_pooled).to(torch.float32)
-        
-        
-        out = self.lin.forward(x_invariant)
-        return out
+
 """class GroupEquivariantReLU(nn.Module):
     
     Naive norm-gate baseline. Ækvivariant, men degenereret: tager normen over
