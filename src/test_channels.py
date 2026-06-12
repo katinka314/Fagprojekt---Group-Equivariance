@@ -16,7 +16,7 @@ from src.train import train_loop, evaluate
 
 
 #hyperparametre inits
-L           = 1
+L           = 2
 KERNEL_SIZE = 5
 N_EPOCHS    = 5
 BATCH_SIZE  = 128
@@ -47,6 +47,11 @@ for channels in CHANNEL_CONFIGS:
                  img_size=IMG_SIZE, n_classes=N_CLASSES, n_conv_layers=2, conv_pr_pool=1)
     cnn = CNN(kernel_size=KERNEL_SIZE, channels=channels,
                  img_size=IMG_SIZE, n_classes=N_CLASSES, n_conv_layers=2, conv_pr_pool=1)
+
+    # Dummy forward så LazyLinear initialiseres inden parameteroptælling
+    dummy = torch.zeros(1, 1, IMG_SIZE, IMG_SIZE)
+    ge(dummy)
+    cnn(dummy)
 
     ge_params  = sum(p.numel() for p in ge.parameters())
     cnn_params = sum(p.numel() for p in cnn.parameters())
