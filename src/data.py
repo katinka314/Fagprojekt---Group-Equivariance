@@ -44,7 +44,7 @@ class RotatedMNIST(Dataset):
 
         data_dir = Path(data_dir)
         self.images = torch.load(data_dir / f"{prefix}{split}_images.pt")
-        self.labels = torch.load(data_dir / f"{prefix}{split}_labels.pt")
+        self.labels = torch.load(data_dir / f"{split}_labels.pt")
         if rotated:
             self.angles = torch.load(data_dir / f"{prefix}{split}_angles.pt")
         else:
