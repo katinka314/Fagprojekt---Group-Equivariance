@@ -87,7 +87,7 @@ if __name__ == "__main__":
     TRAIN_FRACTION = 0.01
     TEST_FRACTION = 0.01
 
-    MODEL = "CNN"
+    MODEL = "GE_CNN" #choose CNN or GE_CNN
     train_dataset = RotatedMNIST(split="train", rotated=True,  fraction=TRAIN_FRACTION)
     test_dataset = RotatedMNIST(split="test", rotated= True, fraction=TEST_FRACTION)
 
@@ -125,11 +125,10 @@ if __name__ == "__main__":
         }
         GE_CNN_model = GE_CNN(**model_args)
         GE_CNN_model.name = "GE_CNN"
-        current_model = GE_CNN
+        current_model = GE_CNN_model
     
 
     model_specifications = "_" # string indicating parameters of model (is just used to uniquely identify the model weights file)
-    current_model = CNN_model # choose CNN:model or GE_CNN_model
     train_loop(current_model, lr=1e-3, train_loader=train_loader, n_epochs=2, test_loader=test_loader)
     
     #SAVE the model weights
