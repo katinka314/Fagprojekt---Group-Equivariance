@@ -24,7 +24,7 @@ from torch import Tensor
 from torchvision import transforms
 
 class GE_CNN(nn.Module):
-    def __init__(self, kernel_size: int, l: int, in_features: int = 1, img_size: int = 28, MLP_size: int = 4, n_conv_layers: int = 3, conv_pr_pool: int = 2, channels: int = 16, n_classes:int = 10, bias:bool = True):
+    def __init__(self, kernel_size: int, l: int, in_features: int = 1, img_size: int = 28, MLP_size: int = 4, n_conv_layers: int = 3, conv_pr_pool: int = 2, channels: int = 16, n_classes:int = 10, bias:bool = True, n_rings = 4):
         super().__init__()
         
         """self.kernel_size = kernel_size
@@ -41,9 +41,9 @@ class GE_CNN(nn.Module):
 
         layers = []
         for i in range(n_conv_layers):
-            layers.append(ConvLayer(ls[i]*self.len_basis, ls[i+1], kernel_size=kernel_size, l=l, bias=bias))
+            layers.append(ConvLayer(ls[i]*self.len_basis, ls[i+1], kernel_size=kernel_size, l=l, bias=bias, n_rings=n_rings))
             for j in range(conv_pr_pool - 1):
-                layers.append(ConvLayer(ls[i+1]*self.len_basis, ls[i+1], kernel_size=kernel_size, l=l, bias=bias))
+                layers.append(ConvLayer(ls[i+1]*self.len_basis, ls[i+1], kernel_size=kernel_size, l=l, bias=bias, n_rings=n_rings))
         
             layers.append(NormNonlinearity(ls[i+1]*self.len_basis))
             reduced_size = img_size//(2**(i+1))
