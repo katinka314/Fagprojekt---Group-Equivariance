@@ -50,10 +50,11 @@ def fourier_basis(kernel_size: int, l: int, plot: bool = False) ->  list:
         if l_ == 0:
             kernel = transform(np.ones((n,n)))
         else:
-            harmonic = transform(np.exp(1j* l_*angle_map))
-        #I center are they undefined, we set them to 0
-        harmonic[n // 2, n//2] = 0
-        kernel = transform(harmonic)
+            harmonic = (np.exp(1j* l_*angle_map))
+            
+            #I center are they undefined, we set them to 0
+            harmonic[n // 2, n//2] = 0
+            kernel = transform(harmonic)
         basis.append(kernel.to(torch.complex64))
         
         
@@ -143,7 +144,7 @@ class LiftingLayer(nn.Module):
 
     
 class ConvLayer(nn.Module):
-    def __init__(self, in_features, out_features, kernel_size, l,  MLP_size: int = 4, bias=True, n_rings = 4):
+    def __init__(self, in_features, out_features, kernel_size, l,  MLP_size: int = 4, bias=True, n_rings = None):
         super(ConvLayer, self).__init__()
         
         # Define learnable parameters
@@ -159,7 +160,7 @@ class ConvLayer(nn.Module):
         #self.mlps = nn.ModuleList([MLP_Radius(bias = self.bias, hidden_units=MLP_size) for _ in range(self.out_features*self.len_basis*self.in_features)])
 
         ### project gaussian boy
-        n_rings = self.k_size // 2 + 2 #husk at argumentere for mængde
+        n_rings = self.k_size // 2 + 2 if n_rings == None else n_rings #husk at argumentere for mængde
         means = torch.linspace(0,1,n_rings,dtype = torch.float32)
         std = (means[1] - means[0])/2 # Distance between 2 centers
         r = torch.tensor(self.radius_map, dtype= torch.float32)
@@ -232,41 +233,30 @@ class ProjectionLayer(nn.Module):
         self.bias = bias
         self.len_basis = l*2 + 1
         self.lin = nn.LazyLinear(self.out_features, bias=self.bias)
+        self.first = True
         
         
     def forward(self,x):
+        
         #x.shape = antal billeder X kanaler X H X W
-        x_invariant = torch.abs(x).flatten(start_dim=1) # tager normen og laver til array/flattener
-        dummy_x = torch.randn_like(x_invariant)
-        self.lin(dummy_x)
+        babs_x = torch.abs(x)
+        x_mean = babs_x.mean(axis = (2,3)) # vi meanpooler fremfor at gøre linear flatten(start_dim=1), for at holde invarians
+        x_max = babs_x.amax(dim = (2,3))
+    
+        x_std = babs_x.std(axis = (2,3))
+        x_invariant = torch.cat((x_mean,x_max,x_std), dim = 1).flatten(start_dim=1)
+        
+        if self.first:
+            dummy_x = torch.randn_like(x_invariant)
+            self.lin(dummy_x)
+            self.first = False
         return self.lin(x_invariant)
 
-"""class GroupEquivariantReLU(nn.Module):
-    
-    Naive norm-gate baseline. Ækvivariant, men degenereret: tager normen over
-    hele (H, W) pr. kanal og nuller kanalen hvis normen er under threshold.
-    Global-lineær pr. kanal (ingen lokal selektivitet) og hård tærskel.
 
-    Til en rigtig, eksakt ækvivariant ikke-linearitet: se NormNonlinearity.
-    
-    def __init__(self, l, n_samples=None, naive=True, threshold=15):
-        super().__init__()
-        self.l = l
-        self.len_basis = 2 * l + 1
-        self.naive = naive
-        self.threshold = threshold
-
-    def forward(self, x):
-        if self.naive:
-            e_norm = torch.norm(x, dim=(-2, -1))
-            mask = e_norm > self.threshold
-            return x * mask[:, :, None, None]
-
-        return x"""
     
 class ComplexAdaptiveAvgPool2d(nn.Module):
-    """nn.AdaptiveAvgPool2d understoetter ikke complex tensors.
-    Pooling er lineaer, saa vi pooler real- og imaginaerdel hver for sig (samme resultat)."""
+    """nn.AdaptiveAvgPool2d understøtter ikke complex tensors.
+    Pooling er linr, så vi pooler real- og imaginærdel hver for sig (samme resultat)."""
     def __init__(self, output_size):
         super().__init__()
         self.pool = nn.AdaptiveAvgPool2d(output_size)
@@ -275,17 +265,6 @@ class ComplexAdaptiveAvgPool2d(nn.Module):
             return torch.complex(self.pool(x.real), self.pool(x.imag))
         return self.pool(x)
 
-class ComplexAdaptiveAvgPool2d(nn.Module):
-    """nn.AdaptiveAvgPool2d does not support complex tensors.
-    Pooling is linear, so we pool the real and imaginary parts separately (same result)."""
-    def __init__(self, output_size):
-        super().__init__()
-        self.pool = nn.AdaptiveAvgPool2d(output_size)
-
-    def forward(self, x):
-        if x.is_complex():
-            return torch.complex(self.pool(x.real), self.pool(x.imag))
-        return self.pool(x)
 
 
 class NormNonlinearity(nn.Module):
@@ -323,13 +302,14 @@ if __name__ == '__main__':
     ll = LiftingLayer(in_features=10, out_features=10, kernel_size=5, l=l)
     conv = ConvLayer(in_features=10*(l*2+1), out_features=12, kernel_size=5, l=l)
 
-    prøy = ProjectionLayer(in_features=12, out_features=10, l=l)
+    prøy = ProjectionLayer(out_features=10, l=l)
     # Dummy image so we can develop without downloading a dataset.
     # Shape (batch, channels, height, width), complex to match the Fourier basis.
 
     out = ll.forward(images)
     out2 = conv.forward(out)
     out3 = prøy.forward(out2)
+    out4 = prøy.forward(torch.rot90(out2, 1, dims =(2,3)))
     
-    print(out.shape)
-    print(out[0][7].shape)
+    print(out3)
+    print(out4)
