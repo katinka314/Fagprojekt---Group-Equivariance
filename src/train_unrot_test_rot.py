@@ -43,9 +43,12 @@ GE_CNN_model = GE_CNN(
     )
 
 CNN_model = CNN(kernel_size= 5, in_features = 1, img_size = 28, n_conv_layers =2, conv_pr_pool = 1, channels = 16, n_classes= 10, bias = True)
-
+dummy = torch.zeros(1,1,28,28)
 
 models = {"CNN": CNN_model, "GE_CNN": GE_CNN_model}
+for m in models.values():
+    m(dummy)
+
 histories = {}
 for name, m in models.items():
     print(f"Training {name} ({sum(p.numel() for p in m.parameters())} parameters)")

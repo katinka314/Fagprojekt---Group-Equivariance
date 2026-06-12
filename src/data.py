@@ -6,7 +6,7 @@ import torch
 import typer
 from PIL import Image
 from torch.utils.data import Dataset
-from torchvision.transforms.functional import rotate
+from torchvision.transforms.functional import rotate, InterpolationMode
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DATA_DIR = PROJECT_ROOT / "data" / "raw" / "archive"
@@ -108,7 +108,7 @@ def rotate_dataset(images: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         angle = random.uniform(0, 360)
 
         pil_image = Image.fromarray(image.numpy(), mode="L")
-        rotated = rotate(pil_image, angle=angle, fill=0)
+        rotated = rotate(pil_image, angle=angle, fill=0, interpolation = InterpolationMode.BILINEAR)
 
         rotated_array = np.array(rotated, dtype=np.uint8)
         rotated_tensor = torch.from_numpy(rotated_array)
