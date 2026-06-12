@@ -90,14 +90,12 @@ class CNN(nn.Module):
         # self.classifier = nn.Linear(ls[n_conv_layers], n_classes, bias=bias)
         self.n_classes = n_classes
         self.bias = bias
-        self.classifier = None
+        self.classifier = nn.LazyLinear(self.n_classes, bias = self.bias)
 
 
     def forward(self, x):
         x = self.features(x)
         x = x.flatten(start_dim = 1)
-        if self.classifier is None:
-            self.classifier = nn.Linear(x.shape[1], self.n_classes, bias = self.bias)
         return self.classifier(x)
 
     # GAMMEL version (LeNet-boilerplate til CIFAR): virkede ikke paa MNIST, da

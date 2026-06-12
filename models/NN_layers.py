@@ -231,19 +231,15 @@ class ProjectionLayer(nn.Module):
         self.out_features = out_features
         self.bias = bias
         self.len_basis = l*2 + 1
-        self.lin = None
+        self.lin = nn.LazyLinear(
+                self.out_features,
+                bias=self.bias
+            )
         
         
     def forward(self,x):
         #x.shape = antal billeder X kanaler X H X W
         x_invariant = torch.abs(x).flatten(start_dim=1) # tager normen og laver til array/flattener
-
-        if self.lin is None:
-            self.lin = nn.Linear(
-                x_invariant.shape[1],
-                self.out_features,
-                bias=self.bias
-            ).to(x.device)
 
         return self.lin(x_invariant)
         #x_invariant = x[:, self.l::self.len_basis,:,:]
