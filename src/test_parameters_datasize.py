@@ -30,15 +30,15 @@ from src.train import train_loop
 # Hyperparametre
 L               = 2
 KERNEL_SIZE     = 5
-N_EPOCHS        = 30
+N_EPOCHS        = 40
 BATCH_SIZE      = 128
 LR              = 1e-3
-IMG_SIZE        = 28
+IMG_SIZE        = 36
 N_CLASSES       = 10
 
 # Data-efficiency sweep: vi matcher GE-CNN til ÉN CNN-størrelse, og træner så
 # begge ved stigende træningsfraktion. Samme (faste) testsæt for alle fraktioner.
-CNN_CHANNELS    = 16
+CNN_CHANNELS    = 8
 TRAIN_FRACTIONS = [0.01, 0.02, 0.03, 0.05, 0.1]
 # Evalueringen efter hver epoke er flaskehalsen (den langsomme GE-CNN kører forward
 # på hele test-loaderen). 2.000 stratificerede billeder giver accuracy med ±~1%,
@@ -59,7 +59,7 @@ GE_KWARGS  = dict(**ARCH_KWARGS)
 CNN_KWARGS = dict(**ARCH_KWARGS)
 
 # Testdata indlæses én gang (samme test for alle fraktioner).
-test_dataset  = RotatedMNIST(split="test", rotated=True, fraction=TEST_FRACTION)
+test_dataset  = RotatedMNIST(split="test", rotated=True, fraction=TEST_FRACTION, padding=True)
 test_loader   = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 
@@ -72,27 +72,34 @@ def count_params(model):
 
 def find_matching_ge_config(target_params,
                             channel_opts=None,
-                            nring_range=range(2, KERNEL_SIZE + 1)):
-    """Find (channels, n_rings) der giver tættest match på target_params.
+                            nring_range=range(2, KERNEL_SIZE + 2)):
+    """Find (channels, n_rings) for den STØRSTE GE-CNN der stadig er <= target_params.
 
-    n_rings cappes ved KERNEL_SIZE: en kxk-kerne har kun k distinkte radier
-    (for 5x5: radierne {0,1,2,4,5,8} -> 6 stk), så flere ringe end det lægger
-    blot overlappende Gaussians på de samme pixels. det er redundant.
+    Vi vælger bevidst en GE-CNN med FÆRRE (eller lige) parametre end CNN'en, så
+    sammenligningen er konservativ: hvis GE-CNN alligevel vinder, kan det ikke
+    forklares med at den er større. Blandt configs <= target tages den tætteste.
+
+    n_rings tillades op til 6 (KERNEL_SIZE+2 er eksklusiv øvre grænse -> max 6):
+    en 5x5-kerne har 6 distinkte radier ({0,1,2,4,5,8}), så 6 ringe er stadig
+    meningsfuldt; flere ville lægge overlappende Gaussians på samme pixels.
 
     channel_opts begrænses til toer-potenser <= CNN_CHANNELS: en GE-CNN med flere
-    kanaler end CNN'en har altid for mange parametre (og en 128-kanals GE-CNN er
-    dyr at bygge, ~4M params), så det er spild at søge dem."""
+    kanaler end CNN'en har altid for mange parametre og er spild at søge."""
     if channel_opts is None:
         channel_opts = [c for c in (2, 4, 8, 16, 32, 64, 128) if c <= CNN_CHANNELS]
-    best = None  # (diff, channels, n_rings, n_params)
+    best = None      # (diff, channels, n_rings, n_params) blandt configs <= target
+    fallback = None  # mindste config, hvis ingen er <= target
     for ch in channel_opts:
         for nr in nring_range:
             ge = GE_CNN(l=L, channels=ch, n_rings=nr, **GE_KWARGS)
             n = count_params(ge)
-            diff = abs(n - target_params)
-            if best is None or diff < best[0]:
-                best = (diff, ch, nr, n)
-    return best  # diff, channels, n_rings, n_params
+            if fallback is None or n < fallback[3]:
+                fallback = (abs(n - target_params), ch, nr, n)
+            if n <= target_params:
+                diff = target_params - n
+                if best is None or diff < best[0]:
+                    best = (diff, ch, nr, n)
+    return best if best is not None else fallback  # diff, channels, n_rings, n_params
 
 
 # Find det parameter-matchede par ÉN gang (uafhængigt af datamængde).
@@ -110,7 +117,7 @@ print(f"forskel: {param_diff:,} ({param_diff/target_params:.1%})\n")
 results = []
 
 for frac in TRAIN_FRACTIONS:
-    train_dataset = RotatedMNIST(split="train", rotated=True, fraction=frac)
+    train_dataset = RotatedMNIST(split="train", rotated=True, fraction=frac, padding=True)
     train_loader  = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     n_train = len(train_dataset)
 
