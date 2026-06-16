@@ -30,7 +30,7 @@ from src.train import train_loop
 # Hyperparametre
 L               = 2
 KERNEL_SIZE     = 5
-N_EPOCHS        = 5
+N_EPOCHS        = 30
 BATCH_SIZE      = 128
 LR              = 1e-3
 IMG_SIZE        = 28
