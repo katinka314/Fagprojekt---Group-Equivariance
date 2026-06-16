@@ -128,7 +128,11 @@ class LiftingLayer(nn.Module):
         if not x.is_complex():
             x = x.to(torch.complex64)
 
-        radius_map = torch.tensor(self.radius_map).float().flatten().unsqueeze(1)
+        # self.basis is a plain tensor attribute (not a registered buffer), so module.to(device)
+        # does NOT move it. Move it lazily to match the input device so this layer runs on GPU.
+        dev = x.device
+        self.basis = self.basis.to(dev)
+        radius_map = torch.tensor(self.radius_map, device=dev).float().flatten().unsqueeze(1)
         kernels = []
         for j in range(self.out_features):
             for i in range(len(self.basis)):
@@ -208,8 +212,14 @@ class ConvLayer(nn.Module):
     def build_kernels(self):
         # The kernels must be rebuilt on every forward call (not in __init__), so the
         # autograd graph from self.weights is fresh for each batch.
+        # self.radials/basis/idxs are plain tensor attributes (not registered buffers), so
+        # module.to(device) does NOT move them. Move them to the parameter's device for GPU.
+        dev = self.weights.device
+        self.radials = self.radials.to(dev)
+        self.basis = self.basis.to(dev)
+        self.idxs = self.idxs.to(dev)
         radial_weigths = torch.einsum('cp,chw->hwp', self.weights, self.radials)
-        kernels = torch.zeros(self.k_size, self.k_size, self.out_features * self.len_basis * self.in_features, dtype = torch.complex64)
+        kernels = torch.zeros(self.k_size, self.k_size, self.out_features * self.len_basis * self.in_features, dtype = torch.complex64, device=dev)
         for basis_idx in range(len(self.basis)):
             mask = (self.idxs == basis_idx)
             kernels[:,:,mask] = self.basis[basis_idx][:,:,None] * radial_weigths[:,:,mask] # we do [:,:,None] bc otherwise it is just 1 basis, but we want to make sure the dimentions match in broadcasting.
