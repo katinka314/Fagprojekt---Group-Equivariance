@@ -112,38 +112,31 @@ class LiftingLayer(nn.Module):
         self.out_features = out_features
         self.bias = bias
         
-        self.basis, self.radius_map = fourier_basis(kernel_size = self.k_size, l = self.l)
-    
-        self.mlps = nn.ModuleList([MLP_Radius(bias = self.bias, hidden_units=MLP_size) for _ in range(self.out_features*len(self.basis))])
-    
+        
+        basis, self.radius_map = fourier_basis(kernel_size=self.k_size, l=self.l)
+        self.register_buffer("basis", basis, persistent=False)
+        radius_col = torch.tensor(self.radius_map, dtype=torch.float32).flatten().unsqueeze(1)
+        self.register_buffer("radius_col", radius_col, persistent=False)
+
+        self.mlps = nn.ModuleList([MLP_Radius(bias=self.bias, hidden_units=MLP_size)
+                                   for _ in range(self.out_features * len(basis))])
+
     def parsing(self, out):
         
         return
         
          
     def forward(self, x):
-        # x shape: (batch_size, in_features)
-        # FIX: the dataset yields float32 but the kernels are complex64, and F.conv2d
-        # refuses to mix dtypes. Remove these two lines for the old behavior (requires complex input).
         if not x.is_complex():
             x = x.to(torch.complex64)
-
-        # self.basis is a plain tensor attribute (not a registered buffer), so module.to(device)
-        # does NOT move it. Move it lazily to match the input device so this layer runs on GPU.
-        dev = x.device
-        self.basis = self.basis.to(dev)
-        radius_map = torch.tensor(self.radius_map, device=dev).float().flatten().unsqueeze(1)
         kernels = []
         for j in range(self.out_features):
             for i in range(len(self.basis)):
-                MLP_Radius_ = self.mlps[j*len(self.basis)+i]
-                radial_weights = MLP_Radius_(radius_map).squeeze_().reshape(self.k_size,self.k_size)
+                mlp = self.mlps[j * len(self.basis) + i]
+                radial_weights = mlp(self.radius_col).squeeze_().reshape(self.k_size, self.k_size)
                 kernels.append(self.basis[i] * radial_weights)
         kernels = torch.stack(kernels).unsqueeze_(1)
-
-        out = F.conv2d(input = x, weight=kernels) #??? SKAL vi specificerer bias, stride padding???
-
-        return out
+        return F.conv2d(input=x, weight=kernels)
 
 
     
@@ -159,7 +152,7 @@ class ConvLayer(nn.Module):
         self.in_features = in_features
         self.out_features = out_features
         self.bias = bias
-        self.basis, self.radius_map = fourier_basis(kernel_size = self.k_size, l = self.l)
+        basis, self.radius_map = fourier_basis(kernel_size = self.k_size, l = self.l)
 
         #self.mlps = nn.ModuleList([MLP_Radius(bias = self.bias, hidden_units=MLP_size) for _ in range(self.out_features*self.len_basis*self.in_features)])
 
@@ -168,7 +161,7 @@ class ConvLayer(nn.Module):
         means = torch.linspace(0,1,n_rings,dtype = torch.float32)
         std = (means[1] - means[0])/2 # Distance between 2 centers
         r = torch.tensor(self.radius_map, dtype= torch.float32)
-        self.radials = torch.exp(-(r[None] - means[:, None, None])**2 / (2 * std**2))  # (J, k, k)
+        radials = torch.exp(-(r[None] - means[:, None, None])**2 / (2 * std**2))  # (J, k, k)
         # Kaiming-style scaling by 1/sqrt(fan_in): one output pixel is a sum of
         # in_features * k^2 products, so without scaling the activations grow by
         # ~sqrt(fan_in) per layer and the logits end up around 1e8.
@@ -179,26 +172,23 @@ class ConvLayer(nn.Module):
 
         # Null kernel: en (l, n, n) tensor af nuller, der matcher basis i dtype.
         # Vi concatenater den på basis-dimensionen, saa self.basis bliver (2l+2, n, n).
-        nullkernel = torch.zeros((self.l, self.k_size, self.k_size), dtype=self.basis.dtype)
-        self.basis = torch.cat([self.basis, nullkernel], dim=0)
-
-        radius_map = torch.tensor(self.radius_map).float().flatten().unsqueeze(1)
+        nullkernel = torch.zeros((self.l, self.k_size, self.k_size), dtype=basis.dtype)
+        basis = torch.cat([basis, nullkernel], dim=0)
 
         idxs = []
-        #mlp_count = 0
         for channel in range(self.out_features):
             for out_freq in range(-self.l, self.l + 1):
                 for in_feature in range(self.in_features):
-                    in_freq = in_feature%(self.len_basis) - self.l
+                    in_freq = in_feature % self.len_basis - self.l
                     basis_freq = out_freq - in_freq
                     basis_idx = basis_freq + self.l
                     idxs.append(basis_idx)
-                    #MLP_Radius_ = self.mlps[mlp_count]
-                    #mlp_count += 1
+        idxs = torch.tensor(idxs)
 
-                    #radial_weights = MLP_Radius_(radius_map).squeeze_().reshape(self.k_size,self.k_size)
-                    #kernels.append(self.basis[basis_idx] * radial_weights)
-        self.idxs = torch.tensor(idxs)
+        self.register_buffer("basis", basis, persistent=False)
+        self.register_buffer("radials", radials, persistent=False)
+        self.register_buffer("idxs", idxs, persistent=False)
+        self._kernel_cache = None
 
         # OLD version (kernels built once in __init__). Crashed on the second backward call,
         # because the autograd graph from self.weights was consumed by the first batch:
@@ -210,29 +200,25 @@ class ConvLayer(nn.Module):
         # self.kernels_tensor = kernels.permute(2,0,1).reshape(self.out_features * (self.len_basis),self.in_features, self.k_size, self.k_size)
 
     def build_kernels(self):
-        # The kernels must be rebuilt on every forward call (not in __init__), so the
-        # autograd graph from self.weights is fresh for each batch.
-        # self.radials/basis/idxs are plain tensor attributes (not registered buffers), so
-        # module.to(device) does NOT move them. Move them to the parameter's device for GPU.
-        dev = self.weights.device
-        self.radials = self.radials.to(dev)
-        self.basis = self.basis.to(dev)
-        self.idxs = self.idxs.to(dev)
-        radial_weigths = torch.einsum('cp,chw->hwp', self.weights, self.radials)
-        kernels = torch.zeros(self.k_size, self.k_size, self.out_features * self.len_basis * self.in_features, dtype = torch.complex64, device=dev)
-        for basis_idx in range(len(self.basis)):
-            mask = (self.idxs == basis_idx)
-            kernels[:,:,mask] = self.basis[basis_idx][:,:,None] * radial_weigths[:,:,mask] # we do [:,:,None] bc otherwise it is just 1 basis, but we want to make sure the dimentions match in broadcasting.
-
-        return kernels.permute(2,0,1).reshape(self.out_features * (self.len_basis),self.in_features, self.k_size, self.k_size) #måske er dim gale pewrmute?
+        radial_weights = torch.einsum('cp,chw->hwp', self.weights, self.radials)
+        radial_weights = radial_weights.permute(2, 0, 1)
+        kernels = self.basis[self.idxs] * radial_weights
+        return kernels.reshape(self.out_features * self.len_basis,
+                               self.in_features, self.k_size, self.k_size)
 
     def forward(self, x):
-        # x shape: (batch_size, in_features)
+        if self.training:
+            kernels = self.build_kernels()
+        else:
+            if self._kernel_cache is None or self._kernel_cache.device != self.weights.device:
+                self._kernel_cache = self.build_kernels().detach()
+            kernels = self._kernel_cache
+        return F.conv2d(input=x, weight=kernels)
 
-        out = F.conv2d(input = x, weight=self.build_kernels())
-        # OLD version: out = F.conv2d(input = x, weight=self.kernels_tensor)
-
-        return out
+    def train(self, mode: bool = True):
+        if mode:
+            self._kernel_cache = None
+        return super().train(mode)
     
     
 class ProjectionLayer(nn.Module):

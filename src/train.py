@@ -35,9 +35,9 @@ def train_loop(model: nn.Module, lr: float, train_loader: DataLoader, n_epochs: 
     test_accuracy = [] if test_loader is not None else None
     for epoch in tqdm(range(n_epochs), desc = f'% Done'):
         model.train()
-        total_loss = 0.0
+        total_loss = torch.zeros((), device=device, dtype=torch.float64)
+        n_correct = torch.zeros((), device=device, dtype=torch.long)
         n_seen = 0
-        n_correct = 0
         progress = tqdm(train_loader, desc=f"Epoch {epoch + 1}/{n_epochs}", disable= not show_progress)
         for images, labels, angles in progress:
             images, labels = images.to(device), labels.to(device)
@@ -47,13 +47,15 @@ def train_loop(model: nn.Module, lr: float, train_loader: DataLoader, n_epochs: 
             loss.backward()
             optimizer.step()
 
-            total_loss += loss.item() * images.size(0)
-            n_correct += (logits.argmax(dim=1) == labels).sum().item()
-            n_seen += images.size(0)
-            progress.set_postfix(avg_loss=f"{total_loss / n_seen:.4f}")
+            bs = images.size(0)
+            total_loss += loss.detach().double() * bs
+            n_correct += (logits.argmax(dim=1) == labels).sum()
+            n_seen += bs
+            if show_progress:
+                progress.set_postfix(avg_loss=f"{(total_loss / n_seen).item():.4f}")
 
-        train_accuracies.append(n_correct/n_seen)
-        train_losses.append(total_loss / n_seen)
+        train_accuracies.append((n_correct.double() / n_seen).item())
+        train_losses.append((total_loss / n_seen).item())
 
         if (test_loader is not None):
             test_loss, test_acc = evaluate(model, test_loader, show_progress= show_progress, device=device)
@@ -73,23 +75,20 @@ def evaluate(model: nn.Module, dataloader: DataLoader, show_progress:bool = True
         device = next(model.parameters()).device
     device = torch.device(device)
     model.to(device)
-
-    model.to(device)
     model.eval()
-    total_loss = 0.0
-    n_correct = 0
+    total_loss = torch.zeros((), device=device, dtype=torch.float64)
+    n_correct = torch.zeros((), device=device, dtype=torch.long)
 
     with torch.no_grad():
         for images, labels, angles in tqdm(dataloader, desc="Evaluating", disable= not show_progress):
             images, labels = images.to(device), labels.to(device)
             logits = model(images)
             loss = criterion(logits, labels)
-
-            total_loss += loss.item() * images.size(0)
-            n_correct += (logits.argmax(dim=1) == labels).sum().item()
+            total_loss += loss.double() * images.size(0)
+            n_correct += (logits.argmax(dim=1) == labels).sum()
 
     n_samples = len(dataloader.dataset)
-    return total_loss / n_samples, n_correct / n_samples
+    return (total_loss / n_samples).item(), (n_correct.double() / n_samples).item()
 
 
 if __name__ == "__main__":  
