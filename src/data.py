@@ -7,11 +7,12 @@ import typer
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.transforms.functional import rotate, InterpolationMode
+import torch.nn.functional as F
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DATA_DIR = PROJECT_ROOT / "data" / "raw" / "archive"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data" / "processed"
-
+PADDING = 4
 
 class RotatedMNIST(Dataset):
     """Rotated MNIST dataset loaded from preprocessed .pt files.
@@ -124,19 +125,25 @@ def rotate_dataset(images: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
     return rotated_images, angles
 
 
-def preprocess_split(image_path: Path, label_path: Path, output_dir: Path, split: str) -> None:
+def preprocess_split(image_path: Path, label_path: Path, output_dir: Path, split: str, pad = PADDING) -> None:
     """Load one split, save plain images, rotated images, angles, and shared labels."""
 
     images = load_mnist_images(image_path)
     labels = load_mnist_labels(label_path)
 
     output_dir.mkdir(parents=True, exist_ok=True)
-
+    
+    padded_images = F.pad(images, (pad,pad,pad,pad), value = 0)
     torch.save(images, output_dir / f"{split}_images.pt")
+    torch.save(images, output_dir / f"{split}_images_padded.pt")
     rotated_images, angles = rotate_dataset(images)
     torch.save(rotated_images, output_dir / f"rotated_{split}_images.pt")
     torch.save(angles, output_dir / f"rotated_{split}_angles.pt")
     torch.save(labels, output_dir / f"{split}_labels.pt")
+    rotated_images, angles = rotate_dataset(padded_images)
+    torch.save(rotated_images, output_dir / f"rotated_{split}_images_padded.pt")
+    torch.save(angles, output_dir / f"rotated_{split}_angles_padded.pt")
+    torch.save(labels, output_dir / f"{split}_labels_padded.pt")
 
     print('All images are proccessed')
 
