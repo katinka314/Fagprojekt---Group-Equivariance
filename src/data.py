@@ -36,18 +36,19 @@ class RotatedMNIST(Dataset):
         (test on normal)
     """
 
-    def __init__(self, data_dir: Path = DEFAULT_OUTPUT_DIR, split: str = "train", rotated: bool = True, fraction: float = 1.0, stratified: bool = True, seed: int = 42) -> None:
+    def __init__(self, data_dir: Path = DEFAULT_OUTPUT_DIR, split: str = "train", rotated: bool = True, padding = False, fraction: float = 1.0, stratified: bool = True, seed: int = 42) -> None:
         if split not in ("train", "test"):
             raise ValueError(f"split must be 'train' or 'test'")
         if not 0.0 < fraction <= 1.0:
             raise ValueError(f"fraction must be in (0, 1]")
         prefix = 'rotated_' if rotated else ''
+        padding = '_padded' if padding else ''  
 
         data_dir = Path(data_dir)
-        self.images = torch.load(data_dir / f"{prefix}{split}_images.pt")
-        self.labels = torch.load(data_dir / f"{split}_labels.pt")
+        self.images = torch.load(data_dir / f"{prefix}{split}_images{padding}.pt")
+        self.labels = torch.load(data_dir / f"{split}_labels{padding}.pt")
         if rotated:
-            self.angles = torch.load(data_dir / f"{prefix}{split}_angles.pt")
+            self.angles = torch.load(data_dir / f"{prefix}{split}_angles{padding}.pt")
         else:
             self.angles = torch.zeros(len(self.images), dtype= torch.float32)
 
@@ -135,7 +136,7 @@ def preprocess_split(image_path: Path, label_path: Path, output_dir: Path, split
     
     padded_images = F.pad(images, (pad,pad,pad,pad), value = 0)
     torch.save(images, output_dir / f"{split}_images.pt")
-    torch.save(images, output_dir / f"{split}_images_padded.pt")
+    torch.save(padded_images, output_dir / f"{split}_images_padded.pt")
     rotated_images, angles = rotate_dataset(images)
     torch.save(rotated_images, output_dir / f"rotated_{split}_images.pt")
     torch.save(angles, output_dir / f"rotated_{split}_angles.pt")
