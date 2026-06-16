@@ -92,7 +92,7 @@ def evaluate(model: nn.Module, dataloader: DataLoader, show_progress:bool = True
     return total_loss / n_samples, n_correct / n_samples
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  
     
     #os.chdir("Fagprojekt---Group-Equivariance")
     # Fraction of the dataset used for training/evaluation (1.0 = everything).
