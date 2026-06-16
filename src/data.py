@@ -1,6 +1,5 @@
 from pathlib import Path
 import random
-
 import numpy as np
 import torch
 import typer
@@ -8,7 +7,13 @@ from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.transforms.functional import rotate, InterpolationMode
 import torch.nn.functional as F
+import kagglehub
 
+
+
+
+
+ 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DATA_DIR = PROJECT_ROOT / "data" / "raw" / "archive"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data" / "processed"
@@ -36,7 +41,14 @@ class RotatedMNIST(Dataset):
         (test on normal)
     """
 
-    def __init__(self, data_dir: Path = DEFAULT_OUTPUT_DIR, split: str = "train", rotated: bool = True, padding = False, fraction: float = 1.0, stratified: bool = True, seed: int = 42) -> None:
+    def __init__(self, data_dir: Path = None, split: str = "train", rotated: bool = True, padding = False, fraction: float = 1.0, stratified: bool = True, seed: int = 42) -> None:
+        if data_dir is None:
+            PROJECT_ROOT = Path(__file__).resolve().parents[1]
+            data_dir = PROJECT_ROOT / "data" / "processed"
+            
+            
+        
+        
         if split not in ("train", "test"):
             raise ValueError(f"split must be 'train' or 'test'")
         if not 0.0 < fraction <= 1.0:
@@ -150,29 +162,50 @@ def preprocess_split(image_path: Path, label_path: Path, output_dir: Path, split
 
 
 
-def preprocess(data_dir: Path = DEFAULT_DATA_DIR, output_dir: Path = DEFAULT_OUTPUT_DIR, seed: int = 42) -> None:
+def preprocess(data_dir: Path = None, output_dir: Path = DEFAULT_OUTPUT_DIR, seed: int = 42) -> None:
+    if data_dir == None:
+        data_dir = Path(kagglehub.dataset_download("zalando-research/fashionmnist"))
+     
     """Create a fixed and, rotated MNIST dataset and save it to disk."""
     random.seed(seed)
-    torch.manual_seed(seed)
-
-    print(f"Project root: {PROJECT_ROOT}")
+    torch.manual_seed(seed) 
     print(f"Using data directory: {data_dir}")
     print(f"Using output directory: {output_dir}")
 
     preprocess_split(
-    image_path=data_dir / "train-images.idx3-ubyte",
-    label_path=data_dir / "train-labels.idx1-ubyte",
+    image_path=data_dir / "train-images-idx3-ubyte",
+    label_path=data_dir / "train-labels-idx1-ubyte",
     output_dir=output_dir,
     split="train",
     )
 
     preprocess_split(
-        image_path=data_dir / "t10k-images.idx3-ubyte",
-        label_path=data_dir / "t10k-labels.idx1-ubyte",
+        image_path=data_dir / "t10k-images-idx3-ubyte",
+        label_path=data_dir / "t10k-labels-idx1-ubyte",
         output_dir=output_dir,
         split="test",
     )
 
 
 if __name__ == "__main__":
+    import matplotlib.pyplot as plt
     typer.run(preprocess)
+   
+    CLASSES = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat",
+            "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
+
+    ds = RotatedMNIST(split="train", rotated=True)  
+
+ 
+    idx = torch.randint(0, len(ds), (8,))
+
+    fig, axes = plt.subplots(1, 8, figsize=(16, 2.5))
+    for ax, i in zip(axes, idx):
+        img, label, angle = ds[int(i)]     
+        ax.imshow(img.squeeze(0), cmap="gray")
+        ax.set_title(f"{CLASSES[int(label)]}\n{float(angle):.0f}°", fontsize=9)
+        ax.axis("off")
+
+    fig.suptitle("Rotated Fashion-MNIST", y=1.05)
+    fig.tight_layout()
+    plt.show()      
