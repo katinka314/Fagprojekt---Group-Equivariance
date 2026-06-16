@@ -16,17 +16,22 @@ from models.Model import *
 from src.data import RotatedMNIST
 
 
-def train_loop(model: nn.Module, lr: float, train_loader: DataLoader, n_epochs: int, test_loader: DataLoader | None = None, show_progress:bool = True) -> tuple[tuple[list, list], tuple[list, list]]:
+def train_loop(model: nn.Module, lr: float, train_loader: DataLoader, n_epochs: int, test_loader: DataLoader | None = None, show_progress:bool = True, device: str | torch.device | None = None) -> tuple[tuple[list, list], tuple[list, list]]:
     """Train the model and return the average loss per epoch. alpha is the learning rate.
 
     If test_loader is given, the model is evaluated on it after every epoch.
+    device: None -> auto CUDA, falling back to CPU.
     """
     #print('Training model: ', model)
+    if device is None:
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = torch.device(device)
+    model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
     train_losses = []
     train_accuracies = []
-    test_lossess = [] if test_loader is not None else None 
+    test_lossess = [] if test_loader is not None else None
     test_accuracy = [] if test_loader is not None else None
     for epoch in tqdm(range(n_epochs), desc = f'% Done'):
         model.train()
@@ -35,6 +40,7 @@ def train_loop(model: nn.Module, lr: float, train_loader: DataLoader, n_epochs: 
         n_correct = 0
         progress = tqdm(train_loader, desc=f"Epoch {epoch + 1}/{n_epochs}", disable= not show_progress)
         for images, labels, angles in progress:
+            images, labels = images.to(device), labels.to(device)
             optimizer.zero_grad()
             logits = model(images)
             loss = criterion(logits, labels)
@@ -45,12 +51,12 @@ def train_loop(model: nn.Module, lr: float, train_loader: DataLoader, n_epochs: 
             n_correct += (logits.argmax(dim=1) == labels).sum().item()
             n_seen += images.size(0)
             progress.set_postfix(avg_loss=f"{total_loss / n_seen:.4f}")
-            
+
         train_accuracies.append(n_correct/n_seen)
         train_losses.append(total_loss / n_seen)
 
         if (test_loader is not None):
-            test_loss, test_acc = evaluate(model, test_loader, show_progress= show_progress)
+            test_loss, test_acc = evaluate(model, test_loader, show_progress= show_progress, device=device)
             test_lossess.append(test_loss)
             test_accuracy.append(test_acc)
             if show_progress:
@@ -60,9 +66,13 @@ def train_loop(model: nn.Module, lr: float, train_loader: DataLoader, n_epochs: 
     return (train_losses, train_accuracies), (test_lossess, test_accuracy)
 
 
-def evaluate(model: nn.Module, dataloader: DataLoader, show_progress:bool = True) -> tuple[float, float]:
+def evaluate(model: nn.Module, dataloader: DataLoader, show_progress:bool = True, device: str | torch.device | None = None) -> tuple[float, float]:
     """Evaluate the model and return (average loss, accuracy)."""
     criterion = nn.CrossEntropyLoss()
+    if device is None:
+        device = next(model.parameters()).device
+    device = torch.device(device)
+    model.to(device)
 
     model.eval()
     total_loss = 0.0
@@ -70,6 +80,7 @@ def evaluate(model: nn.Module, dataloader: DataLoader, show_progress:bool = True
 
     with torch.no_grad():
         for images, labels, angles in tqdm(dataloader, desc="Evaluating", disable= not show_progress):
+            images, labels = images.to(device), labels.to(device)
             logits = model(images)
             loss = criterion(logits, labels)
 
