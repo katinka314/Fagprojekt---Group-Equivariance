@@ -42,7 +42,7 @@ class RotatedMNIST(Dataset):
         if not 0.0 < fraction <= 1.0:
             raise ValueError(f"fraction must be in (0, 1]")
         prefix = 'rotated_' if rotated else ''
-        padding = '_padded' if padding else ''
+        padding = '_padded' if padding else ''  
 
         data_dir = Path(data_dir)
         self.images = torch.load(data_dir / f"{prefix}{split}_images{padding}.pt")
