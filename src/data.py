@@ -17,7 +17,7 @@ import kagglehub
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DATA_DIR = PROJECT_ROOT / "data" / "raw" / "archive"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data" / "processed"
-PADDING = 4
+PADDING = 6
 
 class RotatedMNIST(Dataset):
     """Rotated MNIST dataset loaded from preprocessed .pt files.
