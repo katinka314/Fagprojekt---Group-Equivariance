@@ -1,0 +1,42 @@
+{
+  "config": {
+    "L": 2,
+    "kernel_size": 5,
+    "batch_size": 128,
+    "lr": 0.001,
+    "img_size": 28,
+    "n_classes": 10,
+    "n_rings": 4,
+    "n_conv_layers": 2,
+    "conv_pr_pool": 1,
+    "train_fraction": 0.1,
+    "test_fraction": 1.0,
+    "n_epochs": 100,
+    "seed": 0,
+    "device": "cuda"
+  },
+  "n_params": {
+    "CNN": 95882,
+    "GE_CNN": 69570
+  },
+  "final": {
+    "CNN": {
+      "n_params": 95882,
+      "train_loss": 6.2098584415940275e-06,
+      "train_acc": 1.0,
+      "test_rot_loss": 16.383822402954102,
+      "test_rot_acc": 0.4049,
+      "test_unrot_loss": 0.13309405143375352,
+      "test_unrot_acc": 0.9814
+    },
+    "GE_CNN": {
+      "n_params": 69570,
+      "train_loss": 0.1613328590084506,
+      "train_acc": 0.9431287525016678,
+      "test_rot_loss": 0.9916897384643555,
+      "test_rot_acc": 0.7294,
+      "test_unrot_loss": 0.37111086239814756,
+      "test_unrot_acc": 0.8908
+    }
+  }
+}

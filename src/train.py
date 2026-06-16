@@ -16,23 +16,22 @@ from models.Model import *
 from src.data import RotatedMNIST
 
 
-def train_loop(model: nn.Module, lr: float, train_loader: DataLoader, n_epochs: int, test_loader: DataLoader | None = None, show_progress:bool = True, device: str | torch.device = "cpu") -> tuple[tuple[list, list], tuple[list, list]]:
+def train_loop(model: nn.Module, lr: float, train_loader: DataLoader, n_epochs: int, test_loader: DataLoader | None = None, show_progress:bool = True, device: str | torch.device | None = None) -> tuple[tuple[list, list], tuple[list, list]]:
     """Train the model and return the average loss per epoch. alpha is the learning rate.
 
     If test_loader is given, the model is evaluated on it after every epoch.
+    device: None -> auto CUDA, falling back to CPU.
     """
     #print('Training model: ', model)
+    if device is None:
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = torch.device(device)
     model.to(device)
-    # Lazy layers (LazyLinear) must be materialized with a forward pass
-    # before the optimizer is built, otherwise Adam sees uninitialized parameters.
-    init_images, _, _ = next(iter(train_loader))
-    with torch.no_grad():
-        model(init_images.to(device))
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.CrossEntropyLoss()
     train_losses = []
     train_accuracies = []
-    test_lossess = [] if test_loader is not None else None 
+    test_lossess = [] if test_loader is not None else None
     test_accuracy = [] if test_loader is not None else None
     for epoch in tqdm(range(n_epochs), desc = f'% Done'):
         model.train()
@@ -52,7 +51,7 @@ def train_loop(model: nn.Module, lr: float, train_loader: DataLoader, n_epochs: 
             n_correct += (logits.argmax(dim=1) == labels).sum().item()
             n_seen += images.size(0)
             progress.set_postfix(avg_loss=f"{total_loss / n_seen:.4f}")
-            
+
         train_accuracies.append(n_correct/n_seen)
         train_losses.append(total_loss / n_seen)
 
@@ -67,9 +66,13 @@ def train_loop(model: nn.Module, lr: float, train_loader: DataLoader, n_epochs: 
     return (train_losses, train_accuracies), (test_lossess, test_accuracy)
 
 
-def evaluate(model: nn.Module, dataloader: DataLoader, show_progress:bool = True, device: str | torch.device = "cpu") -> tuple[float, float]:
+def evaluate(model: nn.Module, dataloader: DataLoader, show_progress:bool = True, device: str | torch.device | None = None) -> tuple[float, float]:
     """Evaluate the model and return (average loss, accuracy)."""
     criterion = nn.CrossEntropyLoss()
+    if device is None:
+        device = next(model.parameters()).device
+    device = torch.device(device)
+    model.to(device)
 
     model.to(device)
     model.eval()
@@ -137,13 +140,12 @@ if __name__ == "__main__":
         current_model = GE_CNN_model
     
 
-    model_specifications = "_" # string indicating parameters of model (is just used to uniquely identify the model weights file)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"Using device: {device}")
-    train_loop(current_model, lr=1e-3, train_loader=train_loader, n_epochs=2, test_loader=test_loader, device=device)
+    
+    train_loop(current_model, lr=1e-3, train_loader=train_loader, n_epochs=2, test_loader=test_loader)
     
     #SAVE the model weights
     BASE_DIR = Path(__file__).resolve().parents[1] # home directory (Fagprojekt---GE)
+    model_specifications = "_" # string indicating parameters of model (is just used to uniquely identify the model weights file)
     save_path = os.path.join(BASE_DIR, "models", "model_weights", f"{current_model.name}_model_weights{model_specifications}.pth")
     
     model_state = {

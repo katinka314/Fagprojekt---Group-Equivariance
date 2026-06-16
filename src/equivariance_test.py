@@ -58,25 +58,27 @@ def rotate_batch(images, angles_deg):
 
 def plot_feature_grid(x_list, channel):
     """
-    x_list: list of tensors, each [16, H, W]
+    x_list: list of tensors, each [Channels, H, W] or [1, Channels, H, W]
     """
+    
+    x_list = [t.squeeze(0) if t.dim() == 4 and t.shape[0] == 1 else t 
+        for t in x_list] #fix dimentions if they are not correct - End up with [Channels, H, W]
+
+    org_img = x_list[0][channel] #extract non-rotated image
+    org_img_rotations = rotate_batch(org_img[None,None], angles_deg=angles).squeeze(0).squeeze(1).detach().numpy() #rotate the non-rotated (so that we can compare it to the other rotations.)
+
     n = len(x_list)
-    x_list = [t.squeeze(0) if t.dim() == 4 and t.shape[0] == 1 else t
-        for t in x_list
-    ] #fix dimentions if they are not correct
-
-    org_img = x_list[0][channel]
-    org_img_rotations = rotate_batch(org_img[None,None], angles_deg=angles).view(8, 7, 7).detach().numpy()
-
     fig, axes = plt.subplots(2, n, figsize=(3*n, 6))
 
     for i, (x,org) in enumerate(zip(x_list,org_img_rotations)):
         img = x[channel].detach().cpu()  # extract 1 channel -> [H, W]
 
+        #plot the image that was not rotated before being parsed to the model and aftewards rotated theta degrees
         axes[0, i].imshow(org, cmap='gray')
         axes[0, i].axis("off")
         axes[0, i].set_title(f"rho(g) * f(x), theta:{angles[i]} ")
 
+        # plot the image that were rotated before being parsed to the model
         axes[1, i].imshow(img, cmap='gray')
         axes[1, i].axis("off")
         axes[1, i].set_title(f"f(rho(gx)), theta: {angles[i]} ")
@@ -95,12 +97,16 @@ if model_weights["model_name"] == "CNN":
     model = CNN(**model_weights["model_args"])
 elif model_weights["model_name"] == "GE_CNN":
     model = GE_CNN(**model_weights["model_args"])
+model.name = model_weights["model_name"]
 
 model.load_state_dict(model_weights["state_dict"])
 print("---Loaded model---")
 
 # MAKE PARTIAL MODEL (only layers up until some target layer) ================
-layers = list(model.model.children()) #get all layers in model
+if model.name == "CNN":
+    layers = list(model.features.children())
+if model.name == "GE_CNN":
+    layers = list(model.model.children()) #get all layers in model
 target_layer = min(7, len(layers)) #choose target layer
 partial_model = nn.Sequential(*layers[:target_layer])
 print("Partial model:")
@@ -118,7 +124,7 @@ angles = [i * 45 for i in range(n_rotations)]
 rotated_images = rotate_batch(images, angles) # shape N_images X N_rotations X 1 X H X W
 
 
-
+# PLOT parwise comparison ======================================================
 for image in rotated_images:
     features = []
     for rotation in image:
