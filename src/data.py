@@ -54,7 +54,9 @@ class RotatedMNIST(Dataset):
             generator = torch.Generator().manual_seed(seed)
             if stratified:
                 per_label_indices = []
-                for label in self.labels.unique():
+                #for label in self.labels.unique():
+                #print(self.labels.unique())
+                for label in sorted(set(self.labels.tolist())):
                     label_idx = (self.labels == label).nonzero(as_tuple=True)[0]
                     n_label = int(len(label_idx) * fraction)
                     perm = torch.randperm(len(label_idx), generator=generator)[:n_label]

@@ -37,10 +37,13 @@ IMG_SIZE        = 28
 N_CLASSES       = 10
 
 # Data-efficiency sweep: vi matcher GE-CNN til ÉN CNN-størrelse, og træner så
-# begge ved stigende træningsfraktion. Test sker altid på hele testsættet.
-CNN_CHANNELS    = 32
+# begge ved stigende træningsfraktion. Samme (faste) testsæt for alle fraktioner.
+CNN_CHANNELS    = 16
 TRAIN_FRACTIONS = [0.01, 0.02, 0.03, 0.05, 0.1]
-TEST_FRACTION   = 1.0
+# Evalueringen efter hver epoke er flaskehalsen (den langsomme GE-CNN kører forward
+# på hele test-loaderen). 2.000 stratificerede billeder giver accuracy med ±~1%,
+# rigeligt til kurverne, og gør hele sweepet flere gange hurtigere end fuldt testsæt.
+TEST_FRACTION   = 0.1
 
 ARCH_KWARGS = dict(
     kernel_size   = KERNEL_SIZE,
@@ -68,13 +71,19 @@ def count_params(model):
 
 
 def find_matching_ge_config(target_params,
-                            channel_opts=(2, 4, 8, 16, 32, 64, 128),
+                            channel_opts=None,
                             nring_range=range(2, KERNEL_SIZE + 1)):
     """Find (channels, n_rings) der giver tættest match på target_params.
 
     n_rings cappes ved KERNEL_SIZE: en kxk-kerne har kun k distinkte radier
     (for 5x5: radierne {0,1,2,4,5,8} -> 6 stk), så flere ringe end det lægger
-    blot overlappende Gaussians på de samme pixels. det er redundant."""
+    blot overlappende Gaussians på de samme pixels. det er redundant.
+
+    channel_opts begrænses til toer-potenser <= CNN_CHANNELS: en GE-CNN med flere
+    kanaler end CNN'en har altid for mange parametre (og en 128-kanals GE-CNN er
+    dyr at bygge, ~4M params), så det er spild at søge dem."""
+    if channel_opts is None:
+        channel_opts = [c for c in (2, 4, 8, 16, 32, 64, 128) if c <= CNN_CHANNELS]
     best = None  # (diff, channels, n_rings, n_params)
     for ch in channel_opts:
         for nr in nring_range:
