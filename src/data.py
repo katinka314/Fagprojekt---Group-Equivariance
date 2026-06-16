@@ -135,7 +135,7 @@ def preprocess_split(image_path: Path, label_path: Path, output_dir: Path, split
     
     padded_images = F.pad(images, (pad,pad,pad,pad), value = 0)
     torch.save(images, output_dir / f"{split}_images.pt")
-    torch.save(images, output_dir / f"{split}_images_padded.pt")
+    torch.save(padded_images, output_dir / f"{split}_images_padded.pt")
     rotated_images, angles = rotate_dataset(images)
     torch.save(rotated_images, output_dir / f"rotated_{split}_images.pt")
     torch.save(angles, output_dir / f"rotated_{split}_angles.pt")
