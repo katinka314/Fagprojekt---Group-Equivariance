@@ -30,7 +30,7 @@ from src.train import train_loop
 # Hyperparametre
 L               = 2
 KERNEL_SIZE     = 5
-N_EPOCHS        = 5
+N_EPOCHS        = 30
 BATCH_SIZE      = 128
 LR              = 1e-3
 IMG_SIZE        = 28
@@ -191,7 +191,7 @@ def plot_results(results, save_dir=FAG_PROJEKT_DIR / "reports"):
     ax2.grid(True, alpha=0.3)
     ax2.legend()
 
-    fig.suptitle("Test 2: Data-efficiency ved matchet parameterantal", fontsize=13)
+    fig.suptitle("Test 2: Data-efficiency with matched number of parameters", fontsize=13)
     fig.tight_layout()
 
     fig_path = save_dir / "test_parameters_data_efficiency.png"

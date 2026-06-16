@@ -20,6 +20,8 @@ import torch.nn.functional  as F
 
 from torch import Tensor
 from torchvision import transforms
+from torchvision.transforms.functional import rotate
+from torchvision.transforms import InterpolationMode
 
 import pandas as pd
 import PIL.Image as Image
@@ -65,8 +67,20 @@ def plot_feature_grid(x_list, channel):
         for t in x_list] #fix dimentions if they are not correct - End up with [Channels, H, W]
 
     org_img = x_list[0][channel] #extract non-rotated image
-    org_img_rotations = rotate_batch(org_img[None,None], angles_deg=angles).squeeze(0).squeeze(1).detach().numpy() #rotate the non-rotated (so that we can compare it to the other rotations.)
+    #org_img_rotations = rotate_batch(org_img[None,None], angles_deg=angles).squeeze(0).squeeze(1).detach().numpy() #rotate the non-rotated (so that we can compare it to the other rotations.)
+    rotations = []
 
+    for angle in angles:
+        rotated = rotate(
+            org_img.unsqueeze(0),  # [1, H, W]
+            angle=angle,
+            fill=0,
+            interpolation=InterpolationMode.BILINEAR
+        )
+        rotations.append(rotated.squeeze(0))
+
+    org_img_rotations = torch.stack(rotations)  # [num_angles, H, W]    
+    
     n = len(x_list)
     fig, axes = plt.subplots(2, n, figsize=(3*n, 6))
 
@@ -74,7 +88,7 @@ def plot_feature_grid(x_list, channel):
         img = x[channel].detach().cpu()  # extract 1 channel -> [H, W]
 
         #plot the image that was not rotated before being parsed to the model and aftewards rotated theta degrees
-        axes[0, i].imshow(org, cmap='gray')
+        axes[0, i].imshow(org.detach().numpy(), cmap='gray')
         axes[0, i].axis("off")
         axes[0, i].set_title(f"rho(g) * f(x), theta:{angles[i]} ")
 
@@ -107,7 +121,7 @@ if model.name == "CNN":
     layers = list(model.features.children())
 if model.name == "GE_CNN":
     layers = list(model.model.children()) #get all layers in model
-target_layer = min(7, len(layers)) #choose target layer
+target_layer = min(1, len(layers)) #choose target layer
 partial_model = nn.Sequential(*layers[:target_layer])
 print("Partial model:")
 print(partial_model)
@@ -131,4 +145,4 @@ for image in rotated_images:
         intermediate = partial_model(rotation) # get output of partial model 
         features.append(abs(intermediate))
     
-    plot_feature_grid(features, channel = 5) #choose which channel to plot
+    plot_feature_grid(features, channel = 0) #choose which channel to plot
