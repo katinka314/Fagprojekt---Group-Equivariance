@@ -22,29 +22,23 @@ from train import train_loop, evaluate
 from models.Model import CNN, GE_CNN
 
 
-# Configuration  (model sizes locked: GE-CNN channels=8, CNN channels=16 -> ~equal params)
-def _env_float(name, default):
-    return float(os.environ.get(name, default))
-
-def _env_int(name, default):
-    return int(os.environ.get(name, default))
 
 L              = 2
 KERNEL_SIZE    = 5
-BATCH_SIZE     = _env_int("BATCH_SIZE", 128)
-LR             = _env_float("LR", 1e-3)
+BATCH_SIZE     = 128
+LR             = 1e-3
 IMG_SIZE       = 28
 N_CLASSES      = 10
 N_RINGS        = 4
 N_CONV_LAYERS  = 2
 CONV_PR_POOL   = 1
-TRAIN_FRACTION = _env_float("TRAIN_FRACTION", 0.1)
-TEST_FRACTION  = _env_float("TEST_FRACTION", 1.0)
-# Many more epochs than before (was 10) so both models train close to convergence.
-N_EPOCHS       = _env_int("N_EPOCHS", 100)
-SEED           = _env_int("SEED", 0)
+TRAIN_FRACTION = 0.1
+TEST_FRACTION  = 1.0
 
-DEVICE = os.environ.get("DEVICE") or ("cuda" if torch.cuda.is_available() else "cpu")
+N_EPOCHS       = 10
+SEED           = 0
+
+DEVICE = ("cuda" if torch.cuda.is_available() else "cpu")
 
 OUT_DIR = FAG_PROJEKT_DIR / "reports" / "unrot_rot"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -58,10 +52,9 @@ print(f"Epochs: {N_EPOCHS} | batch: {BATCH_SIZE} | lr: {LR} | "
       f"train_frac: {TRAIN_FRACTION} | test_frac: {TEST_FRACTION}")
 
 
-# ----------------------------------------------------------------------------------------
+#
 # Data:  train on UNROTATED, test on ROTATED (main) and on UNROTATED (in-distribution ref)
-# ----------------------------------------------------------------------------------------
-train_dataset    = RotatedMNIST(split="train", rotated=False, fraction=TRAIN_FRACTION)
+# 
 test_rot_dataset = RotatedMNIST(split="test",  rotated=True,  fraction=TEST_FRACTION)
 test_unr_dataset = RotatedMNIST(split="test",  rotated=False, fraction=TEST_FRACTION)
 
@@ -70,9 +63,9 @@ test_rot_loader = DataLoader(test_rot_dataset, batch_size=BATCH_SIZE, shuffle=Fa
 test_unr_loader = DataLoader(test_unr_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
 
-# ----------------------------------------------------------------------------------------
+
 # Models  (parameter-matched)
-# ----------------------------------------------------------------------------------------
+
 ge_args = dict(kernel_size=KERNEL_SIZE, l=L, in_features=1, img_size=IMG_SIZE,
                n_conv_layers=N_CONV_LAYERS, conv_pr_pool=CONV_PR_POOL, channels=8,
                n_classes=N_CLASSES, bias=True, n_rings=N_RINGS)
@@ -94,9 +87,9 @@ model_args = {"CNN": cnn_args, "GE_CNN": ge_args}
 n_params = {name: sum(p.numel() for p in m.parameters()) for name, m in models.items()}
 
 
-# ----------------------------------------------------------------------------------------
+
 # Train
-# ----------------------------------------------------------------------------------------
+
 histories = {}     # name -> ((train_loss, train_acc), (test_rot_loss, test_rot_acc))
 final = {}         # name -> dict of final metrics
 for name, m in models.items():
@@ -117,9 +110,9 @@ for name, m in models.items():
           f"test(rot) {rot_acc[-1]:.2%}")
 
 
-# ----------------------------------------------------------------------------------------
+
 # Save raw data + summary
-# ----------------------------------------------------------------------------------------
+
 config = dict(L=L, kernel_size=KERNEL_SIZE, batch_size=BATCH_SIZE, lr=LR, img_size=IMG_SIZE,
               n_classes=N_CLASSES, n_rings=N_RINGS, n_conv_layers=N_CONV_LAYERS,
               conv_pr_pool=CONV_PR_POOL, train_fraction=TRAIN_FRACTION,
@@ -139,9 +132,9 @@ for name, m in models.items():
                OUT_DIR / f"{name}_model_weights.pth")
 
 
-# ----------------------------------------------------------------------------------------
+
 # Plots
-# ----------------------------------------------------------------------------------------
+
 colors = {"CNN": "tab:blue", "GE_CNN": "tab:orange"}
 epochs = range(1, N_EPOCHS + 1)
 
