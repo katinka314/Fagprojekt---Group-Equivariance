@@ -24,6 +24,8 @@ from torch import Tensor
 from torchvision import transforms
 from torchvision.transforms.functional import rotate
 from torchvision.transforms import InterpolationMode
+from torch.utils.data import DataLoader
+from train import evaluate
 
 import pandas as pd
 import PIL.Image as Image
@@ -32,6 +34,10 @@ import kagglehub
 path = kagglehub.dataset_download("zalando-research/fashionmnist")
 
 FAG_PROJEKT_DIR = Path(__file__).resolve().parents[1]
+TARGET_LAYER = 5
+NUM_IMAGES = 3
+N_ROTATIONS = 4
+ANGLES = [i * 22.5 for i in range(N_ROTATIONS)]
 
 def rotate_batch(images, angles_deg):
     # images: [B, C, H, W]
@@ -54,7 +60,7 @@ def rotate_batch(images, angles_deg):
         out.append(rotated)
     return torch.stack(out, dim=1)  # [B, 8, C, H, W]
 
-def plot_feature_grid(x_list, channel, save_idx):
+def plot_feature_grid(x_list, channel, model, save_idx):
     """
     x_list: list of tensors, each [Channels, H, W] or [1, Channels, H, W]
     """
@@ -66,7 +72,7 @@ def plot_feature_grid(x_list, channel, save_idx):
     #org_img_rotations = rotate_batch(org_img[None,None], angles_deg=angles).squeeze(0).squeeze(1).detach().numpy() #rotate the non-rotated (so that we can compare it to the other rotations.)
     rotations = []
 
-    for angle in angles:
+    for angle in ANGLES:
         rotated = rotate(
             org_img.unsqueeze(0),  # [1, H, W]
             angle=angle,
@@ -86,15 +92,43 @@ def plot_feature_grid(x_list, channel, save_idx):
         #plot the image that was not rotated before being parsed to the model and aftewards rotated theta degrees
         axes[0, i].imshow(org.detach().numpy(), cmap='gray')
         axes[0, i].axis("off")
-        axes[0, i].set_title(f"rho(g) * f(x), theta:{angles[i]} ")
+        axes[0, i].set_title(f"rho(g) * f(x), theta:{ANGLES[i]} ")
 
         # plot the image that were rotated before being parsed to the model
         axes[1, i].imshow(img, cmap='gray')
         axes[1, i].axis("off")
-        axes[1, i].set_title(f"f(rho(gx)), theta: {angles[i]} ")
+        axes[1, i].set_title(f"f(rho(gx)), theta: {ANGLES[i]} ")
 
     plt.tight_layout()
-    save_path = os.path.join(FAG_PROJEKT_DIR, "reports", "plots", "equivariance_test",f"plot_{save_idx}.png")
+    save_path = os.path.join(FAG_PROJEKT_DIR, "reports", "plots", "equivariance_test",f"{model}_feature_plot_img{save_idx}.png")
+    plt.savefig(save_path, dpi=300, bbox_inches="tight")
+    plt.close()
+
+def plot_class_scores(tensors, model, save_idx):
+    # [num_angles, num_classes]
+    data = torch.stack(tensors).detach().numpy()
+
+    plt.figure(figsize=(10, 4))
+    plt.imshow(data, aspect='auto', cmap='viridis')
+
+    plt.xlabel("Class")
+    plt.ylabel("Image rotation in degrees")
+    plt.colorbar(label="Value")
+    class_names = ["T-shirt/top",
+        "Trouser",
+        "Pullover",
+        "Dress",
+        "Coat",
+        "Sandal",
+        "Shirt",
+        "Sneaker",
+        "Bag",
+        "Ankle boot"
+    ]
+    plt.xticks(ticks = range(10), labels = class_names)
+    plt.yticks(ticks = range(len(tensors)), labels = ANGLES)
+    
+    save_path = os.path.join(FAG_PROJEKT_DIR, "reports", "plots", "equivariance_test",f"{model}_classscores_img{save_idx}.png")
     plt.savefig(save_path, dpi=300, bbox_inches="tight")
     plt.close()
 
@@ -119,30 +153,39 @@ if model.name == "CNN":
     layers = list(model.features.children())
 if model.name == "GE_CNN":
     layers = list(model.model.children()) #get all layers in model
-target_layer = min(1, len(layers)) #choose target layer
+target_layer = min(TARGET_LAYER, len(layers)) #choose target layer
 partial_model = nn.Sequential(*layers[:target_layer])
+
 print("Partial model:")
 print(partial_model)
 
 # LOAD BILLEDER ==============================================================
 data = RotatedMNIST(data_dir = os.path.join(FAG_PROJEKT_DIR, "data", "processed"), split = "train", rotated = False, padding = True)
-num_images = 3
-images = data[:num_images][0].permute([1,0,2,3]) #shape [1, num_img, H, W]
+images = data[:NUM_IMAGES][0].permute([1,0,2,3]) #shape [num_img, 1, H, W]
 
 print("---Loaded images---")
 
 # ROTER BILLEDER =============================================================
-n_rotations = 8
-angles = [i * 45 for i in range(n_rotations)]
-#roterer de 3 billeder
-rotated_images = rotate_batch(images, angles) # shape N_images X N_rotations X 1 X H X W
+rotated_images = rotate_batch(images, ANGLES) # shape N_images X N_rotations X 1 X H X W
 
 
 # PLOT pairwise comparison ======================================================
 for i, image in enumerate(rotated_images):
     features = []
-    for rotation in image:
-        intermediate = partial_model(rotation) # get output of partial model 
-        features.append(abs(intermediate))
+    class_scores = []
+    for rotation_img in image:
+        intermediate_featuremap = partial_model(rotation_img) # get output of partial model
+        prediction = model(rotation_img[None])[0]
+        features.append(abs(intermediate_featuremap))
+        class_scores.append(prediction)
     
-    plot_feature_grid(features, channel = 0, save_idx=i) #choose which channel to plot
+    plot_feature_grid(features, channel = 0, model = model.name, save_idx=i) #choose which channel to plot
+    plot_class_scores(class_scores, model = model.name, save_idx = i)
+
+    BATCH_SIZE     = 128
+    TEST_FRACTION  = 0.1
+    PADDING = True
+    test_rot_dataset = RotatedMNIST(split="test",  rotated=True,  fraction=TEST_FRACTION, padding=PADDING)
+    test_rot_loader = DataLoader(test_rot_dataset, batch_size=BATCH_SIZE, shuffle=False)
+    rot_loss, rot_acc = evaluate(model, test_rot_loader, show_progress=False)
+    print(rot_acc)
