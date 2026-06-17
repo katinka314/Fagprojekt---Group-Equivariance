@@ -2,7 +2,6 @@ from pathlib import Path
 import random
 import numpy as np
 import torch
-import typer
 from PIL import Image
 from torch.utils.data import Dataset
 from torchvision.transforms.functional import rotate, InterpolationMode
@@ -189,12 +188,12 @@ def preprocess(data_dir: Path = None, output_dir: Path = DEFAULT_OUTPUT_DIR, see
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
-    typer.run(preprocess)
+    preprocess()
    
     CLASSES = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat",
             "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
 
-    ds = RotatedMNIST(split="train", rotated=True)  
+    ds = RotatedMNIST(split="train", rotated=True, padding= True)  
 
  
     idx = torch.randint(0, len(ds), (8,))

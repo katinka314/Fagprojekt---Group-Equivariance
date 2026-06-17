@@ -1,5 +1,5 @@
 
-#test 1for kanaler
+#test 1 for kanaler
 
 import sys
 from pathlib import Path
