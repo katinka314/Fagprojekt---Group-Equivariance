@@ -32,7 +32,7 @@ from models.Model import GE_CNN, CNN
 
 # Config
 
-SMOKE   = False     # True = tiny local sanity run, False = full HPC run
+SMOKE   = True     # True = tiny local sanity run, False = full HPC run
 PADDING = True
 
 if SMOKE:
