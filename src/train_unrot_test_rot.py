@@ -2,6 +2,7 @@
 """
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -22,20 +23,20 @@ from models.Model import CNN, GE_CNN
 
 # Config
 
-SMOKE = True   # True = fast local smoke test, False = full overnight/HPC run
+SMOKE = False   # True = fast local smoke test, False = full overnight/HPC run
 PADDING = True
 if SMOKE:
     SEEDS          = range(2)
-    N_EPOCHS       = 5
+    N_EPOCHS       = 5  
     TRAIN_FRACTION = 0.01
     TEST_FRACTION  = 0.05
 else:
     SEEDS          = range(10)
     N_EPOCHS       = 60
-    TRAIN_FRACTION = 0.1
+    TRAIN_FRACTION = float(os.environ.get("TRAIN_FRACTION", 0.1))  # set per-job for the datasize sweep
     TEST_FRACTION  = 1.0
 
-L              = 2
+L              = 3   # raised 2->3 to param-match GE-CNN to CNN: GE 133,234p vs CNN 128,522p (+3.7%)
 KERNEL_SIZE    = 5
 BATCH_SIZE     = 128
 LR             = 1e-3
@@ -45,7 +46,7 @@ N_CONV_LAYERS  = 2
 CONV_PR_POOL   = 1
 
 DEVICE = ("cuda" if torch.cuda.is_available() else "cpu")
-OUT_DIR = FAG_PROJEKT_DIR / "reports" / "unrot_rot"
+OUT_DIR = FAG_PROJEKT_DIR / "reports" / "unrot_rot" / f"frac_{TRAIN_FRACTION}"  # per-fraction subfolder
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 MODEL_NAMES = ["CNN", "GE_CNN"]
