@@ -14,6 +14,8 @@ sys.path.insert(0, str(FAG_PROJEKT_DIR))
 from models.NN_layers import *
 from models.Model import *
 
+from data import RotatedMNIST
+
 import torch 
 import torch.nn as nn
 import torch.nn.functional  as F
@@ -29,13 +31,7 @@ import PIL.Image as Image
 import kagglehub
 path = kagglehub.dataset_download("zalando-research/fashionmnist")
 
-
-def format_img(num_images = 1000):
-    df_train = df[:num_images]
-    img_rows = df_train.iloc[:, 1:].to_numpy() #converts to numpy array (outer dim is pictures)
-    img_square = img_rows.reshape(-1, 28,28).astype(np.uint8) # reshape inner dim to be a pictur HxW
-    images = torch.tensor(img_square, dtype=torch.float32).unsqueeze_(1) / 255.0  # make into tensor and scale pixel values to be in range [0,1] instead of [0,255]
-    return images
+FAG_PROJEKT_DIR = Path(__file__).resolve().parents[1]
 
 def rotate_batch(images, angles_deg):
     # images: [B, C, H, W]
@@ -58,7 +54,7 @@ def rotate_batch(images, angles_deg):
         out.append(rotated)
     return torch.stack(out, dim=1)  # [B, 8, C, H, W]
 
-def plot_feature_grid(x_list, channel):
+def plot_feature_grid(x_list, channel, save_idx):
     """
     x_list: list of tensors, each [Channels, H, W] or [1, Channels, H, W]
     """
@@ -98,7 +94,9 @@ def plot_feature_grid(x_list, channel):
         axes[1, i].set_title(f"f(rho(gx)), theta: {angles[i]} ")
 
     plt.tight_layout()
-    plt.show()
+    save_path = os.path.join(FAG_PROJEKT_DIR, "reports", "plots", "equivariance_test",f"plot_{save_idx}.png")
+    plt.savefig(save_path, dpi=300, bbox_inches="tight")
+    plt.close()
 
 #LOAD MODEL WEIGHTS ========================================================
 model_weights_path = Path(__file__).resolve().parents[1] / "models" / "model_weights" / "GE_CNN_model_weights_.pth"
@@ -127,8 +125,10 @@ print("Partial model:")
 print(partial_model)
 
 # LOAD BILLEDER ==============================================================
-df = pd.read_csv(path + '/fashion-mnist_train.csv') #læs billeder
-images = format_img(num_images=3) 
+data = RotatedMNIST(data_dir = os.path.join(FAG_PROJEKT_DIR, "data", "processed"), split = "train", rotated = False, padding = True)
+num_images = 3
+images = data[:num_images][0].permute([1,0,2,3]) #shape [1, num_img, H, W]
+
 print("---Loaded images---")
 
 # ROTER BILLEDER =============================================================
@@ -138,11 +138,11 @@ angles = [i * 45 for i in range(n_rotations)]
 rotated_images = rotate_batch(images, angles) # shape N_images X N_rotations X 1 X H X W
 
 
-# PLOT parwise comparison ======================================================
-for image in rotated_images:
+# PLOT pairwise comparison ======================================================
+for i, image in enumerate(rotated_images):
     features = []
     for rotation in image:
         intermediate = partial_model(rotation) # get output of partial model 
         features.append(abs(intermediate))
     
-    plot_feature_grid(features, channel = 0) #choose which channel to plot
+    plot_feature_grid(features, channel = 0, save_idx=i) #choose which channel to plot
