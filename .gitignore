@@ -18,12 +18,7 @@ manual_test/
 .DS_Store
 
 # Data
-fag_projekt/data/processed/rotated_test_angles.pt
-fag_projekt/data/processed/rotated_test_images.pt
-fag_projekt/data/processed/rotated_test_labels.pt
-fag_projekt/data/processed/rotated_train_angles.pt
-fag_projekt/data/processed/rotated_train_images.pt
-fag_projekt/data/processed/rotated_train_labels.pt
+
 
 # vim
 *.swp
@@ -153,7 +148,7 @@ celerybeat.pid
 *.sage.py
 
 #data
-data/processed/
+data/processed/*.pt
 
 # Environments
 .env
