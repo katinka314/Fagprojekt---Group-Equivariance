@@ -36,7 +36,8 @@ WEIGHTS = {
 N_ROTATIONS   = 16     # number of angles, full circle (multiple of 4 -> 90-deg pairs exist)
 TARGET_LAYER  = 6      # depth of the partial model used for the scalar metric table
 NUM_IMAGES    = 1      # images to produce per-image plots/grids for
-NUM_QUANT_IMG = 100    # images to average the scalar metrics over
+NUM_QUANT_IMG = 200    # images to average the scalar metrics over
+N_GRID_IMG    = 200     # images to average the feature equivariance grid over
 CHANNEL       = 1      # default feature channel (per-plot channel is set in main)
 PADDING       = True
 DEVICE        = "cuda" if torch.cuda.is_available() else "cpu"
@@ -150,24 +151,26 @@ def plot_class_scores(mat, name, idx, kind, cls):     # mat [N_angles,10]; cls =
 def plot_invariance_grid(probs, name, idx):      # invariance on softmax probs: ||p_i - p_j||
     D = torch.cdist(probs, probs).cpu().numpy()
     plt.figure(figsize=(6, 5))
-    plt.imshow(D, cmap="viridis"); plt.colorbar(label=r"$\|p_i - p_j\|$  (softmax)")
+    plt.imshow(D, cmap="viridis"); plt.colorbar(label=r"Dissimilarity")
     plt.xticks(range(len(ANGLES)), [f"{a:.0f}" for a in ANGLES], rotation=90)
     plt.yticks(range(len(ANGLES)), [f"{a:.0f}" for a in ANGLES])
     plt.xlabel("angle j"); plt.ylabel("angle i"); plt.title(f"{name}: softmax invariance grid")
     plt.tight_layout(); plt.savefig(OUT_DIR / f"{name}_invariance_grid_img{idx}.png", dpi=200); plt.close()
 
 
-def plot_feature_diffgrid(model, name, target_layer, img):   # equivariance grid at a given depth
-    feats = feats_at(model, target_layer, img)
-    n = len(feats)
-    mask = circular_mask(*feats[0].shape[-2:], feats[0].device)
+def plot_feature_diffgrid(model, name, target_layer, imgs):  # MEAN equivariance grid over imgs
+    n = len(ANGLES)
     D = np.zeros((n, n))
-    for i in range(n):
-        for j in range(n):
-            aligned = rotate(feats[i], ANGLES[j] - ANGLES[i], interpolation=InterpolationMode.BILINEAR, fill=0)
-            D[i, j] = masked_rel_l2(aligned, feats[j], mask)
+    for img in imgs:                                  # accumulate the per-image grid, then average
+        feats = feats_at(model, target_layer, img)
+        mask  = circular_mask(*feats[0].shape[-2:], feats[0].device)
+        for i in range(n):
+            for j in range(n):
+                aligned = rotate(feats[i], ANGLES[j] - ANGLES[i], interpolation=InterpolationMode.BILINEAR, fill=0)
+                D[i, j] += masked_rel_l2(aligned, feats[j], mask)
+    D /= len(imgs)
     plt.figure(figsize=(6, 5))
-    plt.imshow(D, cmap="viridis", vmin=0, vmax=1); plt.colorbar(label=r"rel-L2$(\;\rho_{j-i}\,f(\rho_i x),\ f(\rho_j x)\;)$")
+    plt.imshow(D, cmap="viridis", vmin=0, vmax=1); plt.colorbar(label=r"Equivariance dissimilarity")
     plt.xticks(range(n), [f"{a:.0f}" for a in ANGLES], rotation=90)
     plt.yticks(range(n), [f"{a:.0f}" for a in ANGLES])
     plt.xlabel("angle j"); plt.ylabel("angle i")
@@ -192,10 +195,11 @@ def main():
                             ("CNN", 2, 3), ("CNN", 6, 15)]:
         plot_feature_grid(models[name], name, layer, ch, img0)
 
-    # --- Feature equivariance grids at layer 2 and 6, both models ---
+    # --- Feature equivariance grids at layer 2 and 6, both models (mean over images) ---
+    grid_imgs = [data[i][0] for i in range(N_GRID_IMG)]
     for name, model in models.items():
         for layer in (2, 6):
-            plot_feature_diffgrid(model, name, layer, img0)
+            plot_feature_diffgrid(model, name, layer, grid_imgs)
 
     # --- Invariance plots + scalar metrics (table uses global TARGET_LAYER) ---
     summary = {}
