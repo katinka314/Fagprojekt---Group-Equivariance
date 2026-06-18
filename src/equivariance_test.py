@@ -40,6 +40,7 @@ NUM_IMAGES = 3
 N_ROTATIONS = 9
 ANGLES = [i * 22.5 for i in range(N_ROTATIONS)]
 
+
 def rotate_batch(images, angles_deg):
     # images: [B, C, H, W]
     B, C, H, W = images.shape
