@@ -20,7 +20,7 @@ ROOT = FAG_PROJEKT_DIR / "reports" / "param_datasize_2"
 
 FRACTIONS = [0.005, 0.01, 0.03, 0.05, 0.1]
 CHANNELS  = [2, 4, 8, 16, 32]
-MODELS    = ["cnn", "ge_cnn"]
+MODELS    = ["CNN", "GE_CNN"]   # top-level folder per model
 
 
 def main():
@@ -32,7 +32,7 @@ def main():
     for fi, f in enumerate(FRACTIONS):
         for ci, c in enumerate(CHANNELS):
             for mi, m in enumerate(MODELS):
-                path = ROOT / f"datasize_{f}" / f"channels_{c}" / m / "metrics.json"
+                path = ROOT / m / f"datasize_{f}" / f"channels_{c}" / "metrics.json"
                 if not path.exists():
                     missing.append(str(path.relative_to(ROOT)))
                     continue

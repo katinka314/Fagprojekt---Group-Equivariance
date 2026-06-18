@@ -1,0 +1,122 @@
+TRAIN_FRACTION=0.005 CHANNELS=8
+Wed Jun 17 13:08:51 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.159.04             Driver Version: 580.159.04     CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  Tesla V100-PCIE-32GB           On  |   00000000:D8:00.0 Off |                    0 |
+| N/A   33C    P0             25W /  250W |       0MiB /  32768MiB |      0%   E. Process |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+Device: cuda | SMOKE=False | datasize=0.005 | channels=8 | seeds=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] | max_epochs=100 | patience=10 | img=40
+GPU: Tesla V100-PCIE-32GB
+
+CNN: 48,266 params (channels=8)
+  [seed 0] best_epoch= 20  test_acc=0.3957  (n_train=300)
+  [seed 1] best_epoch= 20  test_acc=0.4277  (n_train=300)
+  [seed 2] best_epoch= 18  test_acc=0.4007  (n_train=300)
+  [seed 3] best_epoch= 19  test_acc=0.3914  (n_train=300)
+  [seed 4] best_epoch= 14  test_acc=0.3937  (n_train=300)
+  [seed 5] best_epoch= 26  test_acc=0.4480  (n_train=300)
+  [seed 6] best_epoch= 24  test_acc=0.4044  (n_train=300)
+  [seed 7] best_epoch= 20  test_acc=0.4127  (n_train=300)
+  [seed 8] best_epoch= 24  test_acc=0.4310  (n_train=300)
+  [seed 9] best_epoch= 19  test_acc=0.4306  (n_train=300)
+  [seed 10] best_epoch= 19  test_acc=0.4261  (n_train=300)
+  [seed 11] best_epoch= 21  test_acc=0.4151  (n_train=300)
+  [seed 12] best_epoch= 27  test_acc=0.4169  (n_train=300)
+  [seed 13] best_epoch= 21  test_acc=0.4227  (n_train=300)
+  [seed 14] best_epoch= 22  test_acc=0.4183  (n_train=300)
+  CNN: test_acc 0.4157 +/- 0.0161  ->  /zhome/15/2/217301/desktop/Fagprojekt---Group-Equivariance/reports/param_datasize_2/CNN/datasize_0.005/channels_8
+
+GE_CNN: 101,570 params (channels=8)
+  [seed 0] best_epoch= 34  test_acc=0.5629  (n_train=300)
+  [seed 1] best_epoch= 37  test_acc=0.5388  (n_train=300)
+  [seed 2] best_epoch= 28  test_acc=0.4820  (n_train=300)
+  [seed 3] best_epoch= 40  test_acc=0.5252  (n_train=300)
+  [seed 4] best_epoch= 43  test_acc=0.5406  (n_train=300)
+  [seed 5] best_epoch= 13  test_acc=0.4033  (n_train=300)
+  [seed 6] best_epoch= 45  test_acc=0.5173  (n_train=300)
+  [seed 7] best_epoch= 33  test_acc=0.5279  (n_train=300)
+  [seed 8] best_epoch= 35  test_acc=0.5641  (n_train=300)
+  [seed 9] best_epoch= 42  test_acc=0.5383  (n_train=300)
+  [seed 10] best_epoch= 55  test_acc=0.5557  (n_train=300)
+  [seed 11] best_epoch= 44  test_acc=0.5432  (n_train=300)
+  [seed 12] best_epoch= 34  test_acc=0.5224  (n_train=300)
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@hpc.dtu.dk>
+Subject: Job 28682264: <pd_0.005_8> in cluster <dcc> Exited
+
+Job <pd_0.005_8> was submitted from host <n-62-27-20> by user <s245109> in cluster <dcc> at Wed Jun 17 12:55:42 2026
+Job was executed on host(s) <4*n-62-11-16>, in queue <gpuv100>, as user <s245109> in cluster <dcc> at Wed Jun 17 13:08:50 2026
+</zhome/15/2/217301> was used as the home directory.
+</zhome/15/2/217301/desktop/Fagprojekt---Group-Equivariance> was used as the working directory.
+Started at Wed Jun 17 13:08:50 2026
+Terminated at Wed Jun 17 13:16:27 2026
+Results reported at Wed Jun 17 13:16:27 2026
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#!/bin/sh
+### Per-CELL job template for the datasize x channels grid (CNN vs GE-CNN).
+### One job handles one cell: TRAIN_FRACTION and CHANNELS are set via -env at submit.
+### Outputs land in reports/param_datasize_2/datasize_<f>/channels_<c>/.
+### Submit ALL 30 cells with:   bash src/submit_param_datasize_v3.sh
+### Or one cell manually:
+###   bsub -J pd_0.05_8 \
+###        -o reports/param_datasize_2/datasize_0.05/channels_8/lsf_%J.out \
+###        -e reports/param_datasize_2/datasize_0.05/channels_8/lsf_%J.err \
+###        -env "all, TRAIN_FRACTION=0.05, CHANNELS=8" < src/run_param_datasize_v3.sh
+#BSUB -q gpuv100
+#BSUB -J param_datasize_v3
+#BSUB -n 4
+#BSUB -R "span[hosts=1]"
+#BSUB -R "rusage[mem=8GB]"
+#BSUB -gpu "num=1:mode=exclusive_process"
+#BSUB -W 4:00
+
+cd /zhome/15/2/217301/desktop/Fagprojekt---Group-Equivariance
+echo "TRAIN_FRACTION=${TRAIN_FRACTION:-unset} CHANNELS=${CHANNELS:-unset}"
+nvidia-smi || true
+~/.local/bin/uv run python src/test_parameters_datasize_v3.py
+
+------------------------------------------------------------
+
+TERM_RUNLIMIT: job killed after reaching LSF run time limit.
+Exited with exit code 140.
+
+Resource usage summary:
+
+    CPU time :                                   643.00 sec.
+    Max Memory :                                 1039 MB
+    Average Memory :                             853.86 MB
+    Total Requested Memory :                     32768.00 MB
+    Delta Memory :                               31729.00 MB
+    Max Swap :                                   -
+    Max Processes :                              9
+    Max Threads :                                29
+    Run time :                                   457 sec.
+    Turnaround time :                            1245 sec.
+
+The output (if any) is above this job summary.
+
+
+
+PS:
+
+Read file </zhome/15/2/217301/desktop/Fagprojekt---Group-Equivariance/reports/param_datasize_2/datasize_0.005/channels_8/lsf_28682264.err> for stderr output of this job.
+
