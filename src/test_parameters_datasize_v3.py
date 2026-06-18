@@ -58,10 +58,13 @@ else:
 
 MIN_DELTA             = 1e-4    # minimum monitor-loss drop to count as improvement
 TEST_FRACTION_MONITOR = 0.1     # cheap per-epoch early-stopping signal
-TEST_FRACTION_FINAL   = 1.0     # full test set for final + per-class accuracy
+TEST_FRACTION_FINAL   = 0.2     # 20% stratified test set for final + per-class accuracy
 
 L             = 2
 N_RINGS       = 6               # fixed for every GE-CNN (max for a 5x5 kernel)
+GE_MAX_CHANNELS = 16            # skip GE-CNN above this width (ch=32 GE is far too heavy);
+                                # CNN still runs at every channel width
+GE_MAX_CHANNELS = int(os.environ.get("GE_MAX_CHANNELS", GE_MAX_CHANNELS))
 KERNEL_SIZE   = 5
 BATCH_SIZE    = 128
 LR            = 1e-3
@@ -73,8 +76,10 @@ SAVE_SEED_WEIGHTS = True        # save the trained weights for every seed
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
-OUT_DIR = (FAG_PROJEKT_DIR / "reports" / "param_datasize_2"
-           / f"datasize_{TRAIN_FRACTION}" / f"channels_{CHANNELS}")
+RESULTS_ROOT = FAG_PROJEKT_DIR / "reports" / "param_datasize_2"
+# Model is the TOP-LEVEL folder (CNN / GE_CNN) so each model's results are cleanly
+# separated; the datasize x channels cell is a subpath under each model.
+CELL_SUBPATH = Path(f"datasize_{TRAIN_FRACTION}") / f"channels_{CHANNELS}"
 
 MODEL_NAMES = ["CNN", "GE_CNN"]
 
@@ -200,11 +205,9 @@ def mean_std(values):
 
 
 def main():
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-
     # Fixed test sets (same eval target for every model/seed).
-    test_monitor_ds = RotatedMNIST(split="test", rotated=True, fraction=TEST_FRACTION_MONITOR, padding=PADDING)
-    test_final_ds   = RotatedMNIST(split="test", rotated=True, fraction=TEST_FRACTION_FINAL, padding=PADDING)
+    test_monitor_ds = RotatedMNIST(split="test", rotated=True, fraction=TEST_FRACTION_MONITOR, padding=PADDING, stratified=True)
+    test_final_ds   = RotatedMNIST(split="test", rotated=True, fraction=TEST_FRACTION_FINAL, padding=PADDING, stratified=True)
     test_monitor_loader = DataLoader(test_monitor_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS)
     test_final_loader   = DataLoader(test_final_ds, batch_size=BATCH_SIZE, shuffle=False, num_workers=NUM_WORKERS)
     assert test_monitor_ds.images.shape[-1] == IMG_SIZE, \
@@ -223,8 +226,14 @@ def main():
             "seeds": list(SEEDS), "img_size": IMG_SIZE, "device": DEVICE, "smoke": SMOKE}
 
     for name in MODEL_NAMES:
-        model_dir = OUT_DIR / name.lower()
+        if name == "GE_CNN" and CHANNELS > GE_MAX_CHANNELS:
+            print(f"  GE_CNN skipped at channels={CHANNELS} (too heavy; GE capped at ch={GE_MAX_CHANNELS})")
+            continue
+        model_dir = RESULTS_ROOT / name / CELL_SUBPATH
         model_dir.mkdir(parents=True, exist_ok=True)
+        if (model_dir / "metrics.json").exists():
+            print(f"  {name}: metrics.json already present -> skip (kept, not recomputed)")
+            continue
         args = model_args(name)
         n_params = None
         per_seed = []
@@ -268,7 +277,7 @@ def main():
             json.dump(metrics, f, indent=2)
         print(f"  {name}: test_acc {acc_mean:.4f} +/- {acc_std:.4f}  ->  {model_dir}")
 
-    print(f"\nDone. Cell outputs in {OUT_DIR}")
+    print(f"\nDone. Cell {CELL_SUBPATH} outputs under {RESULTS_ROOT}/<MODEL>/")
 
 
 if __name__ == "__main__":
