@@ -11,12 +11,12 @@ To grupper af plots:
 
   Gruppe 1 - fast datasize, accuracy vs ANTAL PARAMETRE (5 plots):
     For hver datasize plottes begge modeller mod deres EGET parametertal
-    (ikke channels), saa sammenligningen er pr. parameter. Hver model faar
-    sine 5 (eller faerre) channel-punkter placeret ved deres n_params.
+    (ikke channels), så sammenligningen er pr. parameter. Hver model får
+    sine 5 (eller færre) channel-punkter placeret ved deres n_params.
 
   Gruppe 2 - parameter-matchede par, accuracy vs datasize (4 plots):
     Samme channels giver IKKE samme parametertal (GE-CNN har ~3x flere params
-    pr. kanal), saa vi sammenligner i stedet par der matcher parametertallet:
+    pr. kanal), så vi sammenligner i stedet par der matcher parametertallet:
       CNN 2ch  vs GE-CNN 2ch
       CNN 4ch  vs GE-CNN 4ch
       CNN 16ch vs GE-CNN 8ch
@@ -53,8 +53,8 @@ MARKERS = {"CNN": "s", "GE_CNN": "o"}
 LABELS = {"CNN": "CNN", "GE_CNN": "GE-CNN"}
 
 
-GE_START, GE_END = (0.0, 0.6, 0.1), (0.1, 0.3, 0.85)      # groen -> blaa
-CNN_START, CNN_END = (0.95, 0.75, 0.0), (0.75, 0.0, 0.0)  # gul -> roed
+GE_START, GE_END = (0.0, 0.6, 0.1), (0.1, 0.3, 0.85)      
+CNN_START, CNN_END = (0.95, 0.75, 0.0), (0.75, 0.0, 0.0)  
 
 
 def lerp(c1, c2, t):
@@ -110,7 +110,7 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def draw(ax, points, color, marker, label, alpha=0.2, band=True, linestyle="-"):
-    """points: liste af (x, mean, ci_half), tegnes som linje + (valgfrit) 95% CI-baand."""
+    
     points = sorted(points, key=lambda p: p[0])
     if not points:
         return
