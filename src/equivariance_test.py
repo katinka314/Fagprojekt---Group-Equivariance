@@ -34,9 +34,10 @@ import kagglehub
 path = kagglehub.dataset_download("zalando-research/fashionmnist")
 
 FAG_PROJEKT_DIR = Path(__file__).resolve().parents[1]
+WEIGHT_FILE = "GE_CNN_weights_seed4.pth" #choose something from model/model_weights folder
 TARGET_LAYER = 5
 NUM_IMAGES = 3
-N_ROTATIONS = 4
+N_ROTATIONS = 9
 ANGLES = [i * 22.5 for i in range(N_ROTATIONS)]
 
 def rotate_batch(images, angles_deg):
@@ -133,8 +134,8 @@ def plot_class_scores(tensors, model, save_idx):
     plt.close()
 
 #LOAD MODEL WEIGHTS ========================================================
-model_weights_path = Path(__file__).resolve().parents[1] / "models" / "model_weights" / "GE_CNN_model_weights_.pth"
-model_weights = torch.load(model_weights_path)
+model_weights_path = Path(__file__).resolve().parents[1] / "models" / "model_weights" / WEIGHT_FILE
+model_weights = torch.load(model_weights_path, map_location=torch.device('cpu'))
 #model_weights = torch.load("models/model_weights/CNN_model_weights_.pth")
 
 print("Loaded model:", model_weights["model_name"])
