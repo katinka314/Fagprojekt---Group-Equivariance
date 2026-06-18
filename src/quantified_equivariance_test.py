@@ -40,7 +40,7 @@ NUM_QUANT_IMG = 100    # images to average the scalar metrics over
 CHANNEL       = -1     # feature channel to visualise
 PADDING       = True
 DEVICE        = "cuda" if torch.cuda.is_available() else "cpu"
-OUT_DIR       = ROOT / "reports" / "quant_equi" / "equivariance_test"
+OUT_DIR       = ROOT / "reports" / "quant_equi"
 # -------------------------------------------------
 
 ANGLES = [k * 360 / N_ROTATIONS for k in range(N_ROTATIONS)]
