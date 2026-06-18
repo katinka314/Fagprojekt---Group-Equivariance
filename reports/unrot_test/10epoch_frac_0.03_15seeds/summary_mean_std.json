@@ -1,0 +1,854 @@
+{
+  "config": {
+    "train_fraction": 0.03,
+    "test_fraction": 0.1,
+    "n_epochs": 10,
+    "padding": true,
+    "img_size": 40,
+    "lr": 0.001,
+    "batch_size": 128,
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14
+    ],
+    "device": "cpu",
+    "cnn_channels": 16,
+    "ge_channels": 8,
+    "l": 2,
+    "n_rings": 6,
+    "kernel_size": 5,
+    "n_conv_layers": 2,
+    "conv_pr_pool": 1
+  },
+  "n_params": {
+    "CNN": 128522,
+    "GE_CNN": 101570
+  },
+  "per_seed": {
+    "0": {
+      "CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 16,
+          "n_classes": 10,
+          "bias": true
+        },
+        "n_params": 128522,
+        "final_train_loss": 0.465020112991333,
+        "final_train_acc": 0.8211111111111111,
+        "final_test_loss": 6.828777320861817,
+        "final_test_acc": 0.2,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed0.pth"
+      },
+      "GE_CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 8,
+          "n_classes": 10,
+          "bias": true,
+          "l": 2,
+          "n_rings": 6
+        },
+        "n_params": 101570,
+        "final_train_loss": 1.0303882016075983,
+        "final_train_acc": 0.6438888888888888,
+        "final_test_loss": 2.329556177139282,
+        "final_test_acc": 0.383,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed0.pth"
+      }
+    },
+    "1": {
+      "CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 16,
+          "n_classes": 10,
+          "bias": true
+        },
+        "n_params": 128522,
+        "final_train_loss": 0.43875975569089254,
+        "final_train_acc": 0.8416666666666667,
+        "final_test_loss": 5.117738826751709,
+        "final_test_acc": 0.203,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed1.pth"
+      },
+      "GE_CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 8,
+          "n_classes": 10,
+          "bias": true,
+          "l": 2,
+          "n_rings": 6
+        },
+        "n_params": 101570,
+        "final_train_loss": 1.0073164280255635,
+        "final_train_acc": 0.6555555555555556,
+        "final_test_loss": 2.1593305511474608,
+        "final_test_acc": 0.461,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed1.pth"
+      }
+    },
+    "2": {
+      "CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 16,
+          "n_classes": 10,
+          "bias": true
+        },
+        "n_params": 128522,
+        "final_train_loss": 0.4321961450576782,
+        "final_train_acc": 0.8394444444444444,
+        "final_test_loss": 5.550323776245117,
+        "final_test_acc": 0.194,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed2.pth"
+      },
+      "GE_CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 8,
+          "n_classes": 10,
+          "bias": true,
+          "l": 2,
+          "n_rings": 6
+        },
+        "n_params": 101570,
+        "final_train_loss": 1.045188234647115,
+        "final_train_acc": 0.6566666666666666,
+        "final_test_loss": 2.5591178073883056,
+        "final_test_acc": 0.416,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed2.pth"
+      }
+    },
+    "3": {
+      "CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 16,
+          "n_classes": 10,
+          "bias": true
+        },
+        "n_params": 128522,
+        "final_train_loss": 0.4301871024237739,
+        "final_train_acc": 0.845,
+        "final_test_loss": 5.15368724822998,
+        "final_test_acc": 0.188,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed3.pth"
+      },
+      "GE_CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 8,
+          "n_classes": 10,
+          "bias": true,
+          "l": 2,
+          "n_rings": 6
+        },
+        "n_params": 101570,
+        "final_train_loss": 1.0609535953733655,
+        "final_train_acc": 0.65,
+        "final_test_loss": 2.4676958961486815,
+        "final_test_acc": 0.37,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed3.pth"
+      }
+    },
+    "4": {
+      "CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 16,
+          "n_classes": 10,
+          "bias": true
+        },
+        "n_params": 128522,
+        "final_train_loss": 0.4577417328953743,
+        "final_train_acc": 0.8233333333333334,
+        "final_test_loss": 4.273195571899414,
+        "final_test_acc": 0.238,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed4.pth"
+      },
+      "GE_CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 8,
+          "n_classes": 10,
+          "bias": true,
+          "l": 2,
+          "n_rings": 6
+        },
+        "n_params": 101570,
+        "final_train_loss": 1.050753755569458,
+        "final_train_acc": 0.65,
+        "final_test_loss": 2.1748105392456054,
+        "final_test_acc": 0.419,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed4.pth"
+      }
+    },
+    "5": {
+      "CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 16,
+          "n_classes": 10,
+          "bias": true
+        },
+        "n_params": 128522,
+        "final_train_loss": 0.4195215555032094,
+        "final_train_acc": 0.8394444444444444,
+        "final_test_loss": 6.277034233093262,
+        "final_test_acc": 0.19,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed5.pth"
+      },
+      "GE_CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 8,
+          "n_classes": 10,
+          "bias": true,
+          "l": 2,
+          "n_rings": 6
+        },
+        "n_params": 101570,
+        "final_train_loss": 0.9341173481941223,
+        "final_train_acc": 0.6938888888888889,
+        "final_test_loss": 2.6451660804748536,
+        "final_test_acc": 0.372,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed5.pth"
+      }
+    },
+    "6": {
+      "CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 16,
+          "n_classes": 10,
+          "bias": true
+        },
+        "n_params": 128522,
+        "final_train_loss": 0.4390871614880032,
+        "final_train_acc": 0.8394444444444444,
+        "final_test_loss": 5.620803913116455,
+        "final_test_acc": 0.211,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed6.pth"
+      },
+      "GE_CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 8,
+          "n_classes": 10,
+          "bias": true,
+          "l": 2,
+          "n_rings": 6
+        },
+        "n_params": 101570,
+        "final_train_loss": 1.0274907310803731,
+        "final_train_acc": 0.6494444444444445,
+        "final_test_loss": 2.587506685256958,
+        "final_test_acc": 0.388,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed6.pth"
+      }
+    },
+    "7": {
+      "CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 16,
+          "n_classes": 10,
+          "bias": true
+        },
+        "n_params": 128522,
+        "final_train_loss": 0.4499460298485226,
+        "final_train_acc": 0.8355555555555556,
+        "final_test_loss": 5.26711483001709,
+        "final_test_acc": 0.217,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed7.pth"
+      },
+      "GE_CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 8,
+          "n_classes": 10,
+          "bias": true,
+          "l": 2,
+          "n_rings": 6
+        },
+        "n_params": 101570,
+        "final_train_loss": 0.99968560801612,
+        "final_train_acc": 0.6677777777777778,
+        "final_test_loss": 2.145983585357666,
+        "final_test_acc": 0.417,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed7.pth"
+      }
+    },
+    "8": {
+      "CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 16,
+          "n_classes": 10,
+          "bias": true
+        },
+        "n_params": 128522,
+        "final_train_loss": 0.46928647041320803,
+        "final_train_acc": 0.83,
+        "final_test_loss": 5.013938232421875,
+        "final_test_acc": 0.202,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed8.pth"
+      },
+      "GE_CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 8,
+          "n_classes": 10,
+          "bias": true,
+          "l": 2,
+          "n_rings": 6
+        },
+        "n_params": 101570,
+        "final_train_loss": 1.0737919833925036,
+        "final_train_acc": 0.6333333333333333,
+        "final_test_loss": 2.447267909049988,
+        "final_test_acc": 0.377,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed8.pth"
+      }
+    },
+    "9": {
+      "CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 16,
+          "n_classes": 10,
+          "bias": true
+        },
+        "n_params": 128522,
+        "final_train_loss": 0.37568269438213775,
+        "final_train_acc": 0.8655555555555555,
+        "final_test_loss": 6.538651565551758,
+        "final_test_acc": 0.219,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed9.pth"
+      },
+      "GE_CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 8,
+          "n_classes": 10,
+          "bias": true,
+          "l": 2,
+          "n_rings": 6
+        },
+        "n_params": 101570,
+        "final_train_loss": 1.0783592388365004,
+        "final_train_acc": 0.6211111111111111,
+        "final_test_loss": 2.619726558685303,
+        "final_test_acc": 0.402,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed9.pth"
+      }
+    },
+    "10": {
+      "CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 16,
+          "n_classes": 10,
+          "bias": true
+        },
+        "n_params": 128522,
+        "final_train_loss": 0.45082951386769615,
+        "final_train_acc": 0.8383333333333334,
+        "final_test_loss": 5.300970344543457,
+        "final_test_acc": 0.193,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed10.pth"
+      },
+      "GE_CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 8,
+          "n_classes": 10,
+          "bias": true,
+          "l": 2,
+          "n_rings": 6
+        },
+        "n_params": 101570,
+        "final_train_loss": 1.0630301994747586,
+        "final_train_acc": 0.6355555555555555,
+        "final_test_loss": 2.5859019737243654,
+        "final_test_acc": 0.412,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed10.pth"
+      }
+    },
+    "11": {
+      "CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 16,
+          "n_classes": 10,
+          "bias": true
+        },
+        "n_params": 128522,
+        "final_train_loss": 0.46933575047387016,
+        "final_train_acc": 0.8261111111111111,
+        "final_test_loss": 4.831098922729492,
+        "final_test_acc": 0.221,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed11.pth"
+      },
+      "GE_CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 8,
+          "n_classes": 10,
+          "bias": true,
+          "l": 2,
+          "n_rings": 6
+        },
+        "n_params": 101570,
+        "final_train_loss": 0.9487973682085673,
+        "final_train_acc": 0.6738888888888889,
+        "final_test_loss": 2.418730031967163,
+        "final_test_acc": 0.411,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed11.pth"
+      }
+    },
+    "12": {
+      "CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 16,
+          "n_classes": 10,
+          "bias": true
+        },
+        "n_params": 128522,
+        "final_train_loss": 0.4719038542111715,
+        "final_train_acc": 0.8272222222222222,
+        "final_test_loss": 5.573253173828125,
+        "final_test_acc": 0.201,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed12.pth"
+      },
+      "GE_CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 8,
+          "n_classes": 10,
+          "bias": true,
+          "l": 2,
+          "n_rings": 6
+        },
+        "n_params": 101570,
+        "final_train_loss": 1.0291259415944418,
+        "final_train_acc": 0.6338888888888888,
+        "final_test_loss": 2.038574201583862,
+        "final_test_acc": 0.441,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed12.pth"
+      }
+    },
+    "13": {
+      "CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 16,
+          "n_classes": 10,
+          "bias": true
+        },
+        "n_params": 128522,
+        "final_train_loss": 0.5224330674277412,
+        "final_train_acc": 0.7927777777777778,
+        "final_test_loss": 4.507170127868652,
+        "final_test_acc": 0.22,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed13.pth"
+      },
+      "GE_CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 8,
+          "n_classes": 10,
+          "bias": true,
+          "l": 2,
+          "n_rings": 6
+        },
+        "n_params": 101570,
+        "final_train_loss": 1.086663949754503,
+        "final_train_acc": 0.6288888888888889,
+        "final_test_loss": 2.622887842178345,
+        "final_test_acc": 0.352,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed13.pth"
+      }
+    },
+    "14": {
+      "CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 16,
+          "n_classes": 10,
+          "bias": true
+        },
+        "n_params": 128522,
+        "final_train_loss": 0.4442122247483995,
+        "final_train_acc": 0.8344444444444444,
+        "final_test_loss": 4.623538787841797,
+        "final_test_acc": 0.221,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed14.pth"
+      },
+      "GE_CNN": {
+        "model_args": {
+          "kernel_size": 5,
+          "in_features": 1,
+          "img_size": 40,
+          "n_conv_layers": 2,
+          "conv_pr_pool": 1,
+          "channels": 8,
+          "n_classes": 10,
+          "bias": true,
+          "l": 2,
+          "n_rings": 6
+        },
+        "n_params": 101570,
+        "final_train_loss": 1.1904977130889893,
+        "final_train_acc": 0.6083333333333333,
+        "final_test_loss": 2.930301610946655,
+        "final_test_acc": 0.332,
+        "weight_file": "/Users/djphire/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/DTU/4. Semester/Fagprojekt/Fagprojekt---Group-Equivariance/reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed14.pth"
+      }
+    }
+  },
+  "CNN": {
+    "train_loss": {
+      "mean": [
+        1.5353164925310345,
+        0.9360340810528507,
+        0.7574652122744808,
+        0.6815531407495339,
+        0.6123808852390007,
+        0.5800341949904407,
+        0.5360093654923969,
+        0.5069718285026373,
+        0.4749877490511647,
+        0.44907621142820076
+      ],
+      "std": [
+        0.03538724118230457,
+        0.05689473643599528,
+        0.02610592943517556,
+        0.025891049195660543,
+        0.04123303678072307,
+        0.038376234909566216,
+        0.03629411639967715,
+        0.04163918358325443,
+        0.02629097751182919,
+        0.03183220836963324
+      ]
+    },
+    "train_acc": {
+      "mean": [
+        0.4604444444444445,
+        0.6563703703703704,
+        0.719925925925926,
+        0.7484074074074074,
+        0.7737037037037039,
+        0.7832592592592593,
+        0.7996296296296296,
+        0.8121481481481483,
+        0.8251111111111111,
+        0.8332962962962962
+      ],
+      "std": [
+        0.024009661488600335,
+        0.024406415825575675,
+        0.011586776098833173,
+        0.01033577942260673,
+        0.017436792714052997,
+        0.02044248897940595,
+        0.01598426622050187,
+        0.017414273102870304,
+        0.01140716690463165,
+        0.015542038722962906
+      ]
+    },
+    "test_loss": {
+      "mean": [
+        4.3361580870310465,
+        3.7509750401814776,
+        4.4437390874226885,
+        4.4410787982940665,
+        4.7049088934580485,
+        4.63058620999654,
+        4.969639228566488,
+        5.121083705902098,
+        5.084155150604248,
+        5.365153125
+      ],
+      "std": [
+        0.5823524342089099,
+        0.3929145613320336,
+        0.5240513135318665,
+        0.3605016667823788,
+        0.3919969329102504,
+        0.513975048905935,
+        0.4540165394971584,
+        0.8131110185901796,
+        0.4631522116704863,
+        0.7319494022526608
+      ]
+    },
+    "test_acc": {
+      "mean": [
+        0.21533333333333335,
+        0.2086,
+        0.21193333333333336,
+        0.20726666666666674,
+        0.20733333333333331,
+        0.20786666666666667,
+        0.20800000000000005,
+        0.20946666666666666,
+        0.20966666666666667,
+        0.2078666666666667
+      ],
+      "std": [
+        0.019912905602242216,
+        0.018184765994802194,
+        0.01658944012947767,
+        0.01010987259116176,
+        0.01074155260569683,
+        0.01599940475083221,
+        0.016230482784827176,
+        0.014171735787760622,
+        0.011549067164968452,
+        0.014421544729360731
+      ]
+    }
+  },
+  "GE_CNN": {
+    "train_loss": {
+      "mean": [
+        2.7382543107845163,
+        1.9727253136105005,
+        1.656660939251935,
+        1.4812508485405536,
+        1.375971142027113,
+        1.2840050039644595,
+        1.2118371711836922,
+        1.168483593446237,
+        1.1111232632442758,
+        1.0417440197909318
+      ],
+      "std": [
+        0.2477567747788711,
+        0.07584345648659971,
+        0.09076234178160485,
+        0.03974025994403451,
+        0.09560492869174665,
+        0.09937444670832409,
+        0.08013449280463737,
+        0.08052892589562999,
+        0.060524285937630484,
+        0.060413120090569955
+      ]
+    },
+    "train_acc": {
+      "mean": [
+        0.14477777777777776,
+        0.30614814814814817,
+        0.4154814814814815,
+        0.4721851851851852,
+        0.5194074074074074,
+        0.5561851851851853,
+        0.5814814814814814,
+        0.5983703703703703,
+        0.6179259259259261,
+        0.6468148148148146
+      ],
+      "std": [
+        0.019186267870003836,
+        0.027200725774457937,
+        0.026811664873890566,
+        0.016981765647054375,
+        0.03884434334615687,
+        0.03142056041346273,
+        0.026022025220767152,
+        0.024252008286690056,
+        0.023986021306314987,
+        0.02160702685797812
+      ]
+    },
+    "test_loss": {
+      "mean": [
+        2.1904004280090335,
+        1.942074069913228,
+        1.9231395701726277,
+        1.9893173716227213,
+        2.0658886926651,
+        2.2140571144104,
+        2.3788336981455482,
+        2.3388616191228233,
+        2.3960411304473874,
+        2.4488371633529664
+      ],
+      "std": [
+        0.09322416182679327,
+        0.18039702148206216,
+        0.08588890634459453,
+        0.12566030528107822,
+        0.1783147416996589,
+        0.2388481843614171,
+        0.3190824768899589,
+        0.2796810314937489,
+        0.32959318413168465,
+        0.24119655075659047
+      ]
+    },
+    "test_acc": {
+      "mean": [
+        0.2099333333333333,
+        0.2876666666666667,
+        0.3100666666666666,
+        0.3348666666666666,
+        0.35059999999999997,
+        0.35746666666666665,
+        0.36433333333333334,
+        0.37986666666666674,
+        0.39126666666666665,
+        0.39686666666666665
+      ],
+      "std": [
+        0.03201889323211411,
+        0.04925540821163944,
+        0.022776763430763215,
+        0.026946684573873083,
+        0.031721556438124895,
+        0.03591829352187837,
+        0.037444562196602575,
+        0.03506089939899812,
+        0.031194016520266613,
+        0.033810114012286466
+      ]
+    }
+  }
+}
