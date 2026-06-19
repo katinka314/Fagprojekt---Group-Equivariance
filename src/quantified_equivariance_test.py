@@ -30,8 +30,8 @@ from models.Model import CNN, GE_CNN
 
 # ---------------- FREE PARAMETERS ----------------
 WEIGHTS = {
-    "CNN":    ROOT / "models/model_weights/CNN_smallrot_ch4_l2_r6_3pct.pth",
-    "GE_CNN": ROOT / "models/model_weights/GE_CNN_smallrot_ch4_l2_r6_3pct.pth",
+    "CNN":    ROOT / "reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed10.pth",
+    "GE_CNN": ROOT / "reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed6.pth",
 }
 N_ROTATIONS   = 16     # number of angles, full circle (multiple of 4 -> 90-deg pairs exist)
 TARGET_LAYER  = 6      # depth of the partial model used for the scalar metric table
@@ -119,7 +119,7 @@ def feats_at(model, target_layer, img):          # img [1,H,W] -> list of [C,h,w
         return [partial(r[None]).abs()[0] for r in rots]
 
 
-def plot_feature_grid(model, name, target_layer, channel, img, angles=(0, 90, 22.5, 45)):
+def plot_feature_grid(model, name, target_layer, channel, img, angles=(0, 22.5, 45,  90)):
     feats = feats_at(model, target_layer, img)
     idxs  = [min(range(len(ANGLES)), key=lambda k: abs(ANGLES[k] - a)) for a in angles]
     ch0   = feats[0][channel].cpu()
