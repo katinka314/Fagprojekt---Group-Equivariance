@@ -66,7 +66,7 @@ def fourier_basis(kernel_size: int, l: int, plot: bool = False) ->  list:
         if l == 1:
             axes = axes.reshape(2, 1)
         for l_ in range(1, l + 1):
-            kernel_np = basis[l_].squeeze().numpy().T
+            kernel_np = basis[l + l_].squeeze().numpy().T 
             axes[0, l_ - 1].imshow(kernel_np.real)
             axes[0, l_ - 1].set_title(f"cos (l={l_})")
             axes[0, l_ - 1].axis('off')
@@ -167,9 +167,7 @@ class ConvLayer(nn.Module):
         # ~sqrt(fan_in) per layer and the logits end up around 1e8.
         init_scale = (in_features * kernel_size**2) ** -0.5
         self.weights = nn.Parameter(init_scale * torch.randn(n_rings, out_features * self.len_basis * in_features, dtype=torch.float32))
-        # OLD version (unscaled init, and hardcoded 4 instead of n_rings, same value for kernel_size=5):
-        # self.weights = nn.Parameter(torch.randn(4,out_features * self.len_basis * in_features, dtype=torch.float32))
-
+        
         # Null kernel: en (l, n, n) tensor af nuller, der matcher basis i dtype.
         # Vi concatenater den på basis-dimensionen, saa self.basis bliver (2l+2, n, n).
         nullkernel = torch.zeros((self.l, self.k_size, self.k_size), dtype=basis.dtype)
