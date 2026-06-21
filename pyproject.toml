@@ -27,6 +27,7 @@ dependencies = [
     "matplotlib>=3.10.8",
     "kagglehub>=1.0.0",
     "pandas>=3.0.2",
+    "scipy",
 ]
 
 [dependency-groups]

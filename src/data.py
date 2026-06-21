@@ -137,6 +137,16 @@ def rotate_dataset(images: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
     return rotated_images, angles
 
 
+def rotate_90(images: torch.Tensor, seed: int = 42) -> tuple[torch.Tensor, torch.Tensor]:
+    """Rotate each image by a random multiple of 90 degrees (exact, no interpolation)."""
+    g = torch.Generator().manual_seed(seed)
+    ks = torch.randint(0, 4, (len(images),), generator=g)   # number of 90-degree turns per image
+    rotated_images = torch.stack([torch.rot90(img, int(k), dims=(0, 1)) for img, k in zip(images, ks)])
+    angles = ks.to(torch.float32) * 90.0
+
+    return rotated_images, angles
+
+
 def preprocess_split(image_path: Path, label_path: Path, output_dir: Path, split: str, pad = PADDING) -> None:
     """Load one split, save plain images, rotated images, angles, and shared labels."""
 

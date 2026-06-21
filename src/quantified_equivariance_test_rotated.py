@@ -30,8 +30,8 @@ from models.Model import CNN, GE_CNN
 
 # ---------------- FREE PARAMETERS ----------------
 WEIGHTS = {
-    "CNN":    ROOT / "reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/CNN_smallrot_ch16_l2_r6_3pct_10epochs_seed10.pth",
-    "GE_CNN": ROOT / "reports/unrot_test/10epoch_frac_0.03_15seeds/model_weights/GE_CNN_smallrot_ch8_l2_r6_3pct_10epochs_seed6.pth",
+    "CNN":    ROOT / "reports/param_datasize_2/CNN/datasize_0.2/channels_16/weights_seed3.pth",
+    "GE_CNN": ROOT / "reports/param_datasize_2/GE_CNN/datasize_0.03/channels_8/weights_seed3.pth",
 }
 N_ROTATIONS   = 16     # number of angles, full circle (multiple of 4 -> 90-deg pairs exist)
 TARGET_LAYER  = 6      # depth of the partial model used for the scalar metric table
@@ -161,7 +161,7 @@ def plot_feature_grid(model, name, target_layer, channel, img, angles=(0, 22.5, 
         ax[1, col].imshow(feats[gi][channel].cpu().numpy(), cmap="viridis"); ax[1, col].axis("off")
         ax[1, col].set_title(rf"$f(\rho(g)\,x)$  {a:.0f}°")
     fig.tight_layout(rect=[0, 0, 1, 0.95])
-    fig.savefig(OUT_DIR / f"{name}_L{target_layer}_ch{channel}_feature_plot.png", dpi=200)
+    fig.savefig(OUT_DIR / f"ROT_{name}_L{target_layer}_ch{channel}_feature_plot.png", dpi=200)
 
 
 def plot_class_scores(mat, name, idx, kind, cls):     # mat [N_angles,10]; cls = true class of the image
@@ -171,7 +171,7 @@ def plot_class_scores(mat, name, idx, kind, cls):     # mat [N_angles,10]; cls =
     plt.xticks(range(10), CLASS_NAMES, rotation=90)
     plt.yticks(range(len(ANGLES)), [f"{a:.0f}" for a in ANGLES])
     plt.title(f"{name}: {kind} scores for image class: {cls}"); plt.tight_layout()
-    plt.savefig(OUT_DIR / f"{name}_classscores_{kind}_img{idx}.png", dpi=200); plt.close()
+    plt.savefig(OUT_DIR / f"ROT_{name}_classscores_{kind}_img{idx}.png", dpi=200); plt.close()
 
 
 def plot_invariance_grid(D, name, vmax=None):    # mean softmax invariance grid ||p_i - p_j||
@@ -181,7 +181,7 @@ def plot_invariance_grid(D, name, vmax=None):    # mean softmax invariance grid 
     plt.yticks(range(len(ANGLES)), [f"{a:.0f}" for a in ANGLES])
     plt.xlabel("angle j"); plt.ylabel("angle i")
     plt.title(f"{name}: softmax invariance grid)")
-    plt.tight_layout(); plt.savefig(OUT_DIR / f"{name}_invariance_grid.png", dpi=200); plt.close()
+    plt.tight_layout(); plt.savefig(OUT_DIR / f"ROT_{name}_invariance_grid.png", dpi=200); plt.close()
 
 
 def plot_feature_diffgrid(model, name, target_layer, imgs):  # MEAN equivariance grid over imgs
@@ -201,7 +201,7 @@ def plot_feature_diffgrid(model, name, target_layer, imgs):  # MEAN equivariance
     plt.yticks(range(n), [f"{a:.0f}" for a in ANGLES])
     plt.xlabel("angle j"); plt.ylabel("angle i")
     plt.title(rf"{name}: feature equivariance grid (layer {target_layer})")
-    plt.tight_layout(); plt.savefig(OUT_DIR / f"{name}_feature_diffgrid_L{target_layer}.png", dpi=200)
+    plt.tight_layout(); plt.savefig(OUT_DIR / f"ROT_{name}_feature_diffgrid_L{target_layer}.png", dpi=200)
 
 
 Z95 = 1.959964   # normal-approx 95% half-width (n=200 -> t_{.975,199}=1.972, <1% larger)
