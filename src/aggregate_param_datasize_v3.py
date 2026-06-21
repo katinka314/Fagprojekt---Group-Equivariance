@@ -18,7 +18,7 @@ sys.path.insert(0, str(FAG_PROJEKT_DIR))
 
 ROOT = FAG_PROJEKT_DIR / "reports" / "param_datasize_2"
 
-FRACTIONS = [0.005, 0.01, 0.03, 0.05, 0.1]
+FRACTIONS = [0.005, 0.01, 0.03, 0.05, 0.1, 0.2]
 CHANNELS  = [2, 4, 8, 16, 32]
 MODELS    = ["CNN", "GE_CNN"]   # top-level folder per model
 

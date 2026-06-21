@@ -3,7 +3,7 @@ NOter:
 Generer resultat-plots for channel/parameter x datasize testen (param_datasize_2).
 
 Grid (Fashion-MNIST, n_rings=6 fast, padding, img_size=40):
-  datasize (fraction): 0.005, 0.01, 0.03, 0.05, 0.1   (0.5%, 1%, 3%, 5%, 10%)
+  datasize (fraction): 0.005, 0.01, 0.03, 0.05, 0.1, 0.2   (0.5%, 1%, 3%, 5%, 10%, 20%)
   channels:  2, 4, 8, 16, 32
   modeller:  CNN, GE_CNN
 
@@ -39,7 +39,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "reports" / "param_datasize_2"
 OUT_DIR = DATA_DIR / "plots"
 
-DATASIZES = [0.005, 0.01, 0.03, 0.05, 0.1]
+DATASIZES = [0.005, 0.01, 0.03, 0.05, 0.1, 0.2]
 CHANNELS = [2, 4, 8, 16, 32]
 MODELS = ["CNN", "GE_CNN"]
 
@@ -245,7 +245,7 @@ print(f"gemt {out}")
 # samlet plot: alle 5 datasizes (10 kurver), accuracy vs params
 # Én distinkt farve pr. datasize (delt af begge modeller); model skelnes via en
 # linjestil hvor: GE-CNN = fuld linje, CNN = stiplet.
-DATASIZE_COLORS = ["#9467bd", "#1f77b4", "#2ca02c", "#ff7f0e", "#d62728"]
+DATASIZE_COLORS = ["#9467bd", "#1f77b4", "#2ca02c", "#ff7f0e", "#d62728", "#8c564b"]
 fig, ax = plt.subplots(figsize=(9, 6))
 
 for i, ds in enumerate(DATASIZES):

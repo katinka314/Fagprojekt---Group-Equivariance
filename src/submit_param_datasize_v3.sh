@@ -8,8 +8,8 @@
 ROOT=/zhome/15/2/217301/desktop/Fagprojekt---Group-Equivariance
 cd "$ROOT"
 
-FRACTIONS="0.005 0.01 0.03 0.05 0.1"
-CHANNELS_LIST="2 4 8 16 32"
+FRACTIONS="${FRACTIONS:-0.005 0.01 0.03 0.05 0.1}"
+CHANNELS_LIST="${CHANNELS_LIST:-2 4 8 16 32}"
 # gpul40s: 12x L40S 48GB, 24h walltime limit, open queue, usually far less loaded
 # than gpuv100/gpua100. Override with e.g.  QUEUE="gpuv100" bash src/submit_...sh
 QUEUE="${QUEUE:-gpul40s}"
