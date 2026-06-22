@@ -20,7 +20,7 @@ questions:
 │   ├── Model.py            # CNN and GE_CNN model definitions
 │   ├── NN_layers.py        # Steerable layers: LiftingLayer, ConvLayer,
 │   │                       #   ProjectionLayer, NormNonlinearity, etc.
-│   └── model_weights/      # Saved weights used by the equivariance tests
+│   └── model_weights (deprecated)/  # Old standalone saved weights (kept for reference)
 ├── src/
 │   ├── data.py             # RotatedMNIST dataset + preprocessing (download, rotate, pad)
 │   ├── train.py            # Generic train_loop / evaluate helpers
@@ -32,9 +32,10 @@ questions:
 │   ├── plot_train_unrot_test_rot_ci.py  # CI version of the OOD learning curve
 │   ├── quantified_equivariance_test.py          # Quantify invariance/equivariance (unrotated training)
 │   ├── quantified_equivariance_test_rotated.py  #   same, for models trained on rotated data
+│   ├── small_rotation_train.py          # Local run that (re)generates equivariance-test weights
 │   ├── seed_power_worst_average.py      # Power analysis: number of seeds needed
-│   └── *.sh                # HPC (LSF) submit/run scripts
-├── notebooks/              # Exploratory notebooks and figure generation
+│   └── HPC files/          # All HPC (LSF) submit/run scripts (*.sh)
+├── "notebooks - additional plots for report"/  # Extra report figures (Fourier viz, report plots)
 ├── data/
 │   ├── raw/                # Raw Fashion-MNIST (downloaded)
 │   └── processed/          # Preprocessed .pt tensors (generated, git-ignored)
@@ -65,7 +66,7 @@ downloads the raw data, creates rotated and zero-padded ($28\times28 \to
 `data/processed/`. It also shows a sample of rotated images.
 
 ```bash
-python src/data.py
+uv run src/data.py
 ```
 
 This only needs to be run once. The processed tensors are git-ignored.
@@ -76,8 +77,12 @@ This only needs to be run once. The processed tensors are git-ignored.
 
 Quantifies how invariant the class scores and how equivariant the intermediate
 feature maps are across 16 rotations, split into exact $90^\circ$ rotations
-(no interpolation) and interpolated angles. The scripts load trained weights
-from `models/model_weights/`.
+(no interpolation) and interpolated angles. The scripts load weights produced by
+the other experiments and stored under `reports/`: the unrotated-training test
+reads from `reports/unrot_test/...` and the rotated-training test from
+`reports/param_datasize_2/...`. Local equivariance-test weights can be
+(re)generated with `src/small_rotation_train.py`. The old standalone weights now
+live in `models/model_weights (deprecated)/`.
 
 ```bash
 python src/quantified_equivariance_test.py          # models trained on unrotated data
@@ -115,7 +120,9 @@ Per-cell results are written to
 `reports/param_datasize_2/<MODEL>/datasize_<f>/channels_<c>/metrics.json`.
 
 On the HPC cluster the grid is submitted with the LSF scripts
-(`src/submit_param_datasize_v3.sh`, `src/run_param_datasize_v3.sh`).
+(`src/HPC files/submit_param_datasize_v3.sh`,
+`src/HPC files/run_param_datasize_v3.sh`). All `.sh` scripts live in
+`src/HPC files/`.
 
 ### Power analysis (number of seeds)
 
@@ -128,16 +135,16 @@ python src/seed_power_worst_average.py
 
 ## Model overview
 
-- **`models/Model.py`** — `CNN` (standard baseline) and `GE_CNN`. The baseline
+- **`models/Model.py`** - `CNN` (standard baseline) and `GE_CNN`. The baseline
   mirrors the GE-CNN's channel progression, depth, pooling and nonlinearity so
   the two are comparable in structure.
-- **`models/NN_layers.py`** — the equivariant building blocks:
-  - `fourier_basis` — circular-harmonic angular basis $e^{il\alpha}$ sampled on the kernel grid.
-  - `LiftingLayer` — first layer, lifts the real image into the steerable basis (MLP radial profile).
-  - `ConvLayer` — group convolution with steerable kernels (Gaussian-ring radial profile).
-  - `NormNonlinearity` — norm-gated activation that preserves equivariance.
-  - `ProjectionLayer` — reduces each feature map to rotation-invariant statistics (mean, max, std) for the final classification.
-  - `ComplexAdaptiveAvgPool2d` — average pooling for complex-valued feature maps.
+- **`models/NN_layers.py`** - the equivariant building blocks:
+  - `fourier_basis` - circular-harmonic angular basis $e^{il\alpha}$ sampled on the kernel grid.
+  - `LiftingLayer` - first layer, lifts the real image into the steerable basis (MLP radial profile).
+  - `ConvLayer` - group convolution with steerable kernels (Gaussian-ring radial profile).
+  - `NormNonlinearity` - norm-gated activation that preserves equivariance.
+  - `ProjectionLayer` - reduces each feature map to rotation-invariant statistics (mean, max, std) for the final classification.
+  - `ComplexAdaptiveAvgPool2d` - average pooling for complex-valued feature maps.
 
 ## Results
 

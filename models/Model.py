@@ -10,7 +10,12 @@ from torchvision import transforms
 from models.NN_layers import *
 
 class GE_CNN(nn.Module):
-    def __init__(self, kernel_size: int, l: int, in_features: int = 1, img_size: int = 28, MLP_size: int = 4, n_conv_layers: int = 3, conv_pr_pool: int = 2, channels: int = 16, n_classes:int = 10, bias:bool = True, n_rings = 4):
+    """GE-CNN model the model takes as an input:
+    Kernel_siz, l (n_harmonics), in_features, img_size, MLP_Size (deprecated)
+    n_convolutional layers (normally unused), conv_pr_pool (unedited)
+    n_rings, in alle experiments set to 6
+    """
+    def __init__(self, kernel_size: int, l: int, in_features: int = 1, img_size: int = 28, MLP_size: int = 4, n_conv_layers: int = 3, conv_pr_pool: int = 2, channels: int = 16, n_classes:int = 10, bias:bool = True, n_rings = 6):
         super().__init__()
 
         self.n_classes = n_classes
@@ -45,9 +50,7 @@ class GE_CNN(nn.Module):
 class CNN(nn.Module):
     """Standard (non-equivariant) CNN baseline that mirrors GE_CNN's structure:
     same channel progression, same number of conv layers (without padding), one
-    nonlinearity per block and the same pooling, but with real convolutions
-    instead of Fourier kernels. l and MLP_size are unused but kept so the two
-    models can be called the same way."""
+    nonlinearity per block and the same pooling."""
 
     def __init__(self, kernel_size: int = 5, in_features: int = 1, img_size: int = 28,  n_conv_layers: int = 3, conv_pr_pool: int = 2, channels: int = 16, n_classes:int = 10, bias:bool = True):
         super().__init__()

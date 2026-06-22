@@ -53,8 +53,8 @@ def fourier_basis(kernel_size: int, l: int, plot: bool = False) ->  list:
 
     if plot: # plots the non-constant basis functions
         #OBS imshow uses rows downwards. We therefore transpose the matrix before plotting.
-        # Complex basis: e^(i*l*theta) = cos(l*theta) + i*sin(l*theta)
-        # -> real part is cos, imag part is sin
+        # Complex basis
+        #real part is cos, imag part is sin
         fig, axes = plt.subplots(2, l, figsize=(3 * l, 6))
         if l == 1:
             axes = axes.reshape(2, 1)
@@ -105,9 +105,8 @@ class LiftingLayer(nn.Module):
         self.out_features = out_features
         self.bias = bias
 
-
-        basis, self.radius_map = fourier_basis(kernel_size=self.k_size, l=self.l)
-        self.register_buffer("basis", basis, persistent=False)
+        basis, self.radius_map = fourier_basis(kernel_size=self.k_size, l=self.l) #Initializing the basis
+        self.register_buffer("basis", basis, persistent=False) 
         radius_col = torch.tensor(self.radius_map, dtype=torch.float32).flatten().unsqueeze(1)
         self.register_buffer("radius_col", radius_col, persistent=False)
 
@@ -129,6 +128,11 @@ class LiftingLayer(nn.Module):
 
 
 class ConvLayer(nn.Module):
+    """ Convolutional layer for model uses gaussian rings instead og MLP's for radial part
+        
+        Builds the convolutional layer to preserve invariance
+        
+        """
     def __init__(self, in_features, out_features, kernel_size, l,  MLP_size: int = 4, bias=True, n_rings = None):
         super(ConvLayer, self).__init__()
 
@@ -148,14 +152,11 @@ class ConvLayer(nn.Module):
         std = (means[1] - means[0])/2 # Distance between 2 centers
         r = torch.tensor(self.radius_map, dtype= torch.float32)
         radials = torch.exp(-(r[None] - means[:, None, None])**2 / (2 * std**2))  # (J, k, k)
-        # Kaiming-style scaling by 1/sqrt(fan_in): one output pixel is a sum of
-        # in_features * k^2 products, so without scaling the activations grow by
-        # ~sqrt(fan_in) per layer and the logits end up around 1e8.
+        # Scaling by 1/sqrt(in_features x kernel_size^2) used to control logit output.
         init_scale = (in_features * kernel_size**2) ** -0.5
         self.weights = nn.Parameter(init_scale * torch.randn(n_rings, out_features * self.len_basis * in_features, dtype=torch.float32))
 
         # Null kernel: an (l, n, n) tensor of zeros matching the basis dtype.
-        # We concatenate it along the basis dimension so self.basis becomes (2l+2, n, n).
         nullkernel = torch.zeros((self.l, self.k_size, self.k_size), dtype=basis.dtype)
         basis = torch.cat([basis, nullkernel], dim=0)
 
@@ -174,9 +175,6 @@ class ConvLayer(nn.Module):
         self.register_buffer("idxs", idxs, persistent=False)
         self._kernel_cache = None
 
-        # build_kernels() is called in forward (not __init__): building once crashed on the
-        # second backward call, since the autograd graph from self.weights was consumed by
-        # the first batch.
 
     def build_kernels(self):
         radial_weights = torch.einsum('cp,chw->hwp', self.weights, self.radials)
@@ -201,6 +199,7 @@ class ConvLayer(nn.Module):
 
 
 class ProjectionLayer(nn.Module):
+    """ Projection layer for final output of logit values """
     def __init__(self, out_features, l, bias = True):
         super().__init__()
         self.l = l
@@ -214,14 +213,14 @@ class ProjectionLayer(nn.Module):
     def forward(self,x):
 
         # x.shape = num images x channels x H x W
-        babs_x = torch.abs(x)
-        x_mean = babs_x.mean(axis = (2,3)) # mean-pool instead of a linear flatten(start_dim=1) to preserve invariance
-        x_max = babs_x.amax(dim = (2,3))
+        _abs_x = torch.abs(x) # Converting to real
+        x_mean = _abs_x.mean(axis = (2,3)) # mean-pool instead of a linear flatten(start_dim=1) to preserve invariance
+        x_max = _abs_x.amax(dim = (2,3)) # max
 
-        x_std = babs_x.std(axis = (2,3))
-        x_invariant = torch.cat((x_mean,x_max,x_std), dim = 1).flatten(start_dim=1)
+        x_std = _abs_x.std(axis = (2,3)) # std for invariance
+        x_invariant = torch.cat((x_mean,x_max,x_std), dim = 1).flatten(start_dim=1) # Joining all invaraint aspects
 
-        if self.first:
+        if self.first: # Dummy control, to initialize lazy layer.
             dummy_x = torch.randn_like(x_invariant)
             self.lin(dummy_x)
             self.first = False
@@ -231,7 +230,7 @@ class ProjectionLayer(nn.Module):
 
 class ComplexAdaptiveAvgPool2d(nn.Module):
     """nn.AdaptiveAvgPool2d does not support complex tensors.
-    Pooling is linear, so we pool the real and imaginary parts separately (same result)."""
+    Pooling is linear, so we pool the real and imaginary parts separately"""
     def __init__(self, output_size):
         super().__init__()
         self.pool = nn.AdaptiveAvgPool2d(output_size)
@@ -244,7 +243,7 @@ class ComplexAdaptiveAvgPool2d(nn.Module):
 
 class NormNonlinearity(nn.Module):
     """
-        f_out = f * relu(|f| - b) / (|f| + eps)
+     f_out = f * relu(|f| - b) / (|f| + eps)
     """
     def __init__(self, num_channels, eps=1e-6):
         super().__init__()
