@@ -3,7 +3,7 @@ NOter:
 Generer resultat-plots for channel/parameter x datasize testen (param_datasize_2).
 
 Grid (Fashion-MNIST, n_rings=6 fast, padding, img_size=40):
-  datasize (fraction): 0.005, 0.01, 0.03, 0.05, 0.1   (0.5%, 1%, 3%, 5%, 10%)
+  datasize (fraction): 0.005, 0.01, 0.03, 0.05, 0.1, 0.2   (0.5%, 1%, 3%, 5%, 10%, 20%)
   channels:  2, 4, 8, 16, 32
   modeller:  CNN, GE_CNN
 
@@ -33,12 +33,13 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
+from scipy.stats import ttest_rel
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = ROOT / "reports" / "param_datasize_2"
 OUT_DIR = DATA_DIR / "plots"
 
-DATASIZES = [0.005, 0.01, 0.03, 0.05, 0.1]
+DATASIZES = [0.005, 0.01, 0.03, 0.05, 0.1, 0.2]
 CHANNELS = [2, 4, 8, 16, 32]
 MODELS = ["CNN", "GE_CNN"]
 
@@ -83,28 +84,53 @@ def mean_and_ci(values):
     return m, half
 
 
+# --- Statistik: parret t-test (scipy) ----------------------------------------
+
+def paired_t_test(sample_a, sample_b):
+    """Parret t-test paa to seed-parrede lister, regnet som (a - b).
+
+    Returnerer dict med mean-difference, t, df, n og to-sidet p, eller None
+    hvis der er faerre end 2 par.
+    """
+    n = len(sample_a)
+    if n < 2:
+        return None
+    res = ttest_rel(sample_a, sample_b)
+    md = sum(a - b for a, b in zip(sample_a, sample_b)) / n
+    return {"mean_diff": md, "t": float(res.statistic),
+            "df": n - 1, "p": float(res.pvalue), "n": n}
+
+
 def load_cell(model, ds, ch):
-    """Returner (accs, n_params) for en celle, eller None hvis den mangler."""
+    """Returner (accs, n_params, seed_acc) for en celle, eller None hvis den mangler.
+
+    seed_acc er {seed: final_test_acc} saa testene kan parre paa seed-niveau.
+    """
     path = DATA_DIR / model / f"datasize_{ds}" / f"channels_{ch}" / "metrics.json"
     if not path.exists():
         return None
     with open(path, "r") as f:
         data = json.load(f)
-    accs = [s["final_test_acc"] for s in data["per_seed"]]
-    return (accs, data["n_params"]) if accs else None
+    per = data["per_seed"]
+    accs = [s["final_test_acc"] for s in per]
+    seed_acc = {s["seed"]: s["final_test_acc"] for s in per}
+    return (accs, data["n_params"], seed_acc) if accs else None
 
 
 # stats[(model, ds, ch)] = (mean, ci_half, n_seeds, n_params)
+# seed_accs[(model, ds, ch)] = {seed: final_test_acc}  (til parrede tests)
 stats = {}
+seed_accs = {}
 for model in MODELS:
     for ds in DATASIZES:
         for ch in CHANNELS:
             cell = load_cell(model, ds, ch)
             if cell is None:
                 continue
-            accs, n_params = cell
+            accs, n_params, seed_acc = cell
             m, half = mean_and_ci(accs)
             stats[(model, ds, ch)] = (m, half, len(accs), n_params)
+            seed_accs[(model, ds, ch)] = seed_acc
 
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -219,7 +245,7 @@ print(f"gemt {out}")
 # samlet plot: alle 5 datasizes (10 kurver), accuracy vs params
 # Én distinkt farve pr. datasize (delt af begge modeller); model skelnes via en
 # linjestil hvor: GE-CNN = fuld linje, CNN = stiplet.
-DATASIZE_COLORS = ["#9467bd", "#1f77b4", "#2ca02c", "#ff7f0e", "#d62728"]
+DATASIZE_COLORS = ["#9467bd", "#1f77b4", "#2ca02c", "#ff7f0e", "#d62728", "#8c564b"]
 fig, ax = plt.subplots(figsize=(9, 6))
 
 for i, ds in enumerate(DATASIZES):
@@ -254,5 +280,49 @@ out = OUT_DIR / "fixed_datasize_combined.png"
 fig.savefig(out, dpi=150, bbox_inches="tight")
 plt.close(fig)
 print(f"gemt {out}")
+
+# Statistisk test: mindste vs stoerste model pr. (model, datasize)
+# Parret t-test paa de 15 seeds. Hver seed deler samme train-subset, samme
+# shuffle-raekkefoelge og samme faste test-saet paa tvaers af modelstoerrelser
+# (jf. test_parameters_datasize_v3.py make_loaders), saa accuracies er parrede
+# pr. seed og forskellen testes paa de 15 parvise differenser.
+ALPHA = 0.05
+
+print("\n" + "=" * 78)
+print("Paired t-test: smallest vs largest model (per data size, per model)")
+print("Pairing: per-seed (same train subset and test set across model sizes).")
+print("Mean diff = mean over seeds of (largest acc - smallest acc); + favours larger.")
+print("=" * 78)
+
+for ds in DATASIZES:
+    print(f"\nData size = {ds*100:g}%")
+    for model in MODELS:
+        # Kanaler der findes for denne (model, ds), i samme udvalg som plottet.
+        chans = [ch for ch in PARAM_PLOT_CHANNELS[model] if (model, ds, ch) in stats]
+        if len(chans) < 2:
+            print(f"  {LABELS[model]:7s}  (kun {len(chans)} stoerrelse - springer over)")
+            continue
+        ch_small = min(chans, key=lambda c: stats[(model, ds, c)][3])
+        ch_large = max(chans, key=lambda c: stats[(model, ds, c)][3])
+        big, small = seed_accs[(model, ds, ch_large)], seed_accs[(model, ds, ch_small)]
+        seeds = sorted(set(big) & set(small))
+        res = paired_t_test([big[s] for s in seeds], [small[s] for s in seeds])
+        if res is None:
+            print(f"  {LABELS[model]:7s}  (for faa parrede seeds - springer over)")
+            continue
+        m_small, _, _, np_small = stats[(model, ds, ch_small)]
+        m_large, _, _, np_large = stats[(model, ds, ch_large)]
+        mark = "*" if res["p"] < ALPHA else "ns"
+        print(
+            f"  {LABELS[model]:7s} "
+            f"{ch_small:>2d}ch({np_small/1000:6.1f}k) -> {ch_large:>2d}ch({np_large/1000:6.1f}k)  "
+            f"acc {m_small:.4f} -> {m_large:.4f}  "
+            f"diff={res['mean_diff']:+.4f}  "
+            f"t={res['t']:+.3f}  df={res['df']}  n={res['n']}  "
+            f"p={res['p']:.4g}  {mark}"
+        )
+
+print(f"\n* = significant at alpha={ALPHA} (two-sided), ns = not significant.")
+print("=" * 78)
 
 print(f"\nFærdig - {len(DATASIZES)} datasize-plots + {len(PAIRINGS)} par-plots + 2 samlede i {OUT_DIR}")
