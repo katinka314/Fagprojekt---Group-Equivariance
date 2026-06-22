@@ -1,0 +1,16 @@
+    72	uffe0520
+    51	KatinkaMG
+    23	LucasBurmester
+    21	Lucas Burmester (merges)
+    20	Uffe Grøn Roepstorff (merges)
+     9	KIDDER024 (Phi Vo)
+     8	Katinka Grønnegaard (merges)
+     5	Phi Vo (merges)
+
+
+For implementing the NN_layers, Katinka and Uffe have sit together, 
+writing the models on one PC the majority of the time.
+
+The group has in plenum discussed different code implementations.
+
+Phi Vo have worked together with Lucas in making parameters test.

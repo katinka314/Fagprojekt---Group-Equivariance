@@ -1,0 +1,209 @@
+3ef1489 - KatinkaMG, 9 minutes ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+a66b38b - KatinkaMG, 10 minutes ago : added plot
+e74a68a - uffe0520, 10 minutes ago : Last changes for final repo
+bba85d4 - Lucas Burmester, 2 hours ago : Merge pull request #52 from katinka314/lucas_brunch
+040b4f2 - LucasBurmester, 2 hours ago : Structured the final repo of the project, made presentable and with READ.ME file for the repo
+3c9b685 - Lucas Burmester, 3 hours ago : Merge pull request #51 from katinka314/lucas_brunch
+dc69912 - LucasBurmester, 3 hours ago : Merge branch 'main' into lucas_brunch
+c228a6e - LucasBurmester, 3 hours ago : yada merge confliucts
+5d54a33 - LucasBurmester, 4 hours ago : final changes to the plots used in the report
+bfc44bc - Uffe Grøn Roepstorff, 4 hours ago : Merge pull request #49 from katinka314/Uffe
+2e590f7 - uffe0520, 4 hours ago : Merge branch 'main' into Uffe
+4394f04 - uffe0520, 4 hours ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+8851b0e - uffe0520, 4 hours ago : More plots for the quantiattive equivaraince test
+b83edbf - KatinkaMG, 4 hours ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+669f9e2 - KatinkaMG, 4 hours ago : visualization for theory section
+1d7be23 - uffe0520, 16 hours ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+f8a3061 - uffe0520, 16 hours ago : Flere plots med roteret equivaraince test
+70f0e80 - Uffe Grøn Roepstorff, 30 hours ago : Merge pull request #48 from katinka314/Uffe
+86a860d - uffe0520, 30 hours ago : Plots og resultater for 20% af dataen
+a891c89 - Uffe Grøn Roepstorff, 2 days ago : Merge pull request #47 from katinka314/Uffe
+319de34 - uffe0520, 2 days ago : Param datasize v3 test for 20% af datasæet for completeness
+84adbd7 - uffe0520, 2 days ago : Resutlater for parameter test for 20% af datasættet for completeness for parametertest v3
+70d099d - KatinkaMG, 3 days ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+b33fbae - KatinkaMG, 3 days ago : Visualization of the basis functions
+830a976 - Uffe Grøn Roepstorff, 3 days ago : Merge pull request #46 from katinka314/Uffe
+4ffbffd - uffe0520, 3 days ago : Updated plots for equivariance, using a new model
+6cbfb10 - Uffe Grøn Roepstorff, 4 days ago : Merge pull request #45 from katinka314/Uffe
+479d764 - uffe0520, 4 days ago : Updated plots for equivariance
+6a4f32b - Uffe Grøn Roepstorff, 4 days ago : Merge pull request #44 from katinka314/Uffe
+d6240f3 - uffe0520, 4 days ago : Merge branch 'main' into Uffe
+eb05758 - uffe0520, 4 days ago : Updated plots for equivariance
+ca39130 - Lucas Burmester, 4 days ago : Merge pull request #43 from katinka314/lucas_brunch
+fb8b08a - LucasBurmester, 4 days ago : made some changes in the test
+848c9ea - Lucas Burmester, 4 days ago : Merge pull request #42 from katinka314/lucas_brunch
+e7f9d72 - LucasBurmester, 4 days ago : created af file to create the final plots of the parameters and datasize test. uses thethe data from the param_datasize_2 folder
+95d801b - Lucas Burmester, 4 days ago : Merge pull request #41 from katinka314/lucas_brunch
+4b108f6 - LucasBurmester, 4 days ago : wrote the whole script to get these plots. these are the final plots which we will use in the report. 4 plots with parameter matching and 5 plots with datasize fixing. and then 1 combined plot for each of these two groups
+4f44dc6 - Phi Vo, 4 days ago : Merge pull request #40 from katinka314/Phi
+9b6b052 - KIDDER024, 4 days ago : Added comparison plot and swaped the colors for CNN and GE-CNN
+b6633d0 - Phi Vo, 4 days ago : Merge pull request #39 from katinka314/Phi
+d9e0de2 - KIDDER024, 4 days ago : Added Train on unrotated and test on rotated (parameter close to same) test
+ac323c7 - uffe0520, 4 days ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+e1f49b2 - uffe0520, 4 days ago : rykket en mappe op i quantified equivariance
+a63cb69 - KatinkaMG, 4 days ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+99c2450 - KatinkaMG, 4 days ago : Equivariance test for updated weights
+a3d6924 - Uffe Grøn Roepstorff, 4 days ago : Merge pull request #38 from katinka314/Uffe
+fd4ae39 - uffe0520, 4 days ago : Alle vores test resultater fra den store equivariance test
+c1bd31e - Uffe Grøn Roepstorff, 5 days ago : Merge pull request #37 from katinka314/equivariance
+4e196e2 - uffe0520, 5 days ago : lille revert
+a2ee9c9 - uffe0520, 5 days ago : Opdateret equivariance test med kvanitative resultater. Klar til databehandling og plots
+f622075 - Uffe Grøn Roepstorff, 5 days ago : Merge pull request #36 from katinka314/Uffe
+4fd5bd1 - Phi Vo, 5 days ago : Merge pull request #35 from katinka314/Phi
+ab07023 - KIDDER024, 5 days ago : removed wrong file
+0e41691 - KIDDER024, 5 days ago : Updated seed calculater
+10bce86 - Phi Vo, 5 days ago : Merge pull request #34 from katinka314/Phi
+7274c15 - KIDDER024, 5 days ago : Calculate seed
+5840289 - KatinkaMG, 5 days ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+0bb978a - KatinkaMG, 5 days ago : equivariance test - added class score plot
+5cce42a - uffe0520, 5 days ago : CNN og GE_CNN modeller
+59d558a - uffe0520, 5 days ago : V3 tests
+9c8b7b4 - Lucas Burmester, 5 days ago : Merge pull request #33 from katinka314/lucas_brunch
+60790b9 - LucasBurmester, 5 days ago : deleted unessecary files and now uses the better versions
+7962cfe - uffe0520, 5 days ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+68fa6cc - uffe0520, 5 days ago : bugfix i plots
+397033b - KatinkaMG, 5 days ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+2227e8c - KatinkaMG, 5 days ago : changed import of dataset to be the same as the other tests. plots are now saved in a folder.
+481f725 - Uffe Grøn Roepstorff, 5 days ago : Merge pull request #32 from katinka314/Uffe
+83bdf50 - uffe0520, 5 days ago : Nattens HPC testresultater
+7bbddc5 - uffe0520, 6 days ago : padding = 6
+d53aa93 - Uffe Grøn Roepstorff, 6 days ago : Merge pull request #31 from katinka314/Uffe
+b879a8a - uffe0520, 6 days ago : Train_unrot til err bars
+4575cff - uffe0520, 6 days ago : Fjern legacy filer
+f67ee76 - uffe0520, 6 days ago : Stop tracking af genererede .pt-filer
+2fa89d5 - uffe0520, 6 days ago : Stop tracking af genererede .pt-filer
+b9f1700 - Uffe Grøn Roepstorff, 6 days ago : Merge pull request #30 from katinka314/Uffe
+c276105 - uffe0520, 6 days ago : Fixet bug i data.py
+e57922b - Uffe Grøn Roepstorff, 6 days ago : Merge pull request #29 from katinka314/Uffe
+a037a39 - uffe0520, 6 days ago : perf: speed up GE-CNN training without changing results
+bbc14ad - Uffe Grøn Roepstorff, 6 days ago : Merge pull request #28 from katinka314/Uffe
+c7afa2e - uffe0520, 6 days ago : OPdatere train_unrot_
+5308c79 - Uffe Grøn Roepstorff, 6 days ago : Merge pull request #27 from katinka314/Uffe
+f08d40f - uffe0520, 6 days ago : HPC Resultater
+19b7828 - Lucas Burmester, 6 days ago : Merge pull request #26 from katinka314/lucas_branch
+f449159 - LucasBurmester, 6 days ago : changed the test again...
+eba6e52 - Lucas Burmester, 6 days ago : Merge pull request #25 from katinka314/lucas_branch
+d9f238d - LucasBurmester, 6 days ago : fixed the padding on the data
+e358454 - Uffe Grøn Roepstorff, 6 days ago : Merge pull request #24 from katinka314/Uffe
+6a50af9 - uffe0520, 6 days ago : Merge branch 'main' into Uffe Merging
+bb66f04 - uffe0520, 6 days ago : test
+de4985b - uffe0520, 6 days ago : Opdateret så vi kan vælge data i dataloader
+416c4f2 - Lucas Burmester, 6 days ago : Merge pull request #23 from katinka314/lucas_branch
+5e1e817 - Uffe Grøn Roepstorff, 6 days ago : Merge pull request #21 from katinka314/Uffe
+a55ec10 - LucasBurmester, 6 days ago : changes in test again
+4db471a - Katinka Grønnegaard, 6 days ago : Merge pull request #22 from katinka314/Katinka
+778788b - KatinkaMG, 6 days ago : changed rotation method to match initial data rotation
+71e94e1 - uffe0520, 6 days ago : Tilføjet padding datasæt så vi kan teste for padding
+9225f5f - Phi Vo, 6 days ago : Merge pull request #20 from katinka314/Phi
+87f7fbc - uffe0520, 6 days ago : mellemrum
+656bbdc - uffe0520, 6 days ago : Merge branch 'Uffe' of https://github.com/katinka314/Fagprojekt---Group-Equivariance into Uffe
+3e3dc8c - KIDDER024, 6 days ago : Clean up
+700b8fc - uffe0520, 6 days ago : Merge remote-tracking branch 'origin/main' into Uffe
+d81e107 - uffe0520, 6 days ago : OPtimeret kode til at køre på HPC, Træn uroteret mod roteret test resultater er oppe.
+9c36e08 - Lucas Burmester, 6 days ago : Merge pull request #19 from katinka314/lucas_branch
+f1b57c4 - LucasBurmester, 6 days ago : changed data file for the test to work correctly
+2dc39ef - Lucas Burmester, 6 days ago : Merge pull request #18 from katinka314/lucas_branch
+6fc787d - LucasBurmester, 6 days ago : changed the test to also focus on the performance across different training dataset sizes to see if the GE-CNN will outperforme when dataset is smaller.
+5d93524 - Lucas Burmester, 7 days ago : Merge pull request #17 from katinka314/lucas_branch
+87ccb2c - LucasBurmester, 7 days ago : made changes to the test
+dbdb07b - Katinka Grønnegaard, 10 days ago : Merge pull request #16 from katinka314/Katinka
+a6f4005 - KatinkaMG, 10 days ago : weights are now saved when running train unrot test rot
+f8d7c6e - Lucas Burmester, 10 days ago : Merge pull request #15 from katinka314/lucas_branch
+a2bc4ad - LucasBurmester, 10 days ago : fixed bug in data.py
+3cf9ee9 - uffe0520, 10 days ago : Opdateret train.py
+c4c0d23 - KatinkaMG, 10 days ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+76b6840 - KatinkaMG, 10 days ago : fixed bug when importing CNN
+fc2959b - Uffe Grøn Roepstorff, 10 days ago : Merge pull request #14 from katinka314/Uffe
+9bfe367 - uffe0520, 10 days ago : Merge remote-tracking branch 'origin/main' into Uffe
+cc34377 - KatinkaMG, 10 days ago : finished equivariance test (for now)
+6383447 - uffe0520, 10 days ago : fix: use bilinear interpolation for dataset rotation and made sure that the model is truly invariant- it all checks out
+0b5fa22 - KatinkaMG, 10 days ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+bde5060 - KatinkaMG, 10 days ago : finished equivariance test (for now)
+c92272a - Lucas Burmester, 10 days ago : Merge pull request #13 from katinka314/lucas_branch
+5df71cc - LucasBurmester, 10 days ago : changed the GE-CNN model to use the argument of n_rings as well in the ConvLayer
+3c5af40 - Lucas Burmester, 10 days ago : Merge pull request #12 from katinka314/lucas_branch
+5635c9a - LucasBurmester, 10 days ago : fixed the problem of not using the n_rings argument in the model.py file since a bugh overwrote it in NN_layers.py
+d58cc73 - Lucas Burmester, 10 days ago : Merge pull request #11 from katinka314/lucas_branch
+8ecc2a7 - LucasBurmester, 10 days ago : created thet test for comparing parameters between the two models. and fixed the test for channels
+593b21d - uffe0520, 10 days ago : Merge branch 'main' into Uffe w
+54c09b6 - Lucas Burmester, 10 days ago : Merge pull request #10 from katinka314/lucas_branch
+2851833 - Katinka Grønnegaard, 10 days ago : Merge pull request #9 from katinka314/Katinka
+c377ed5 - uffe0520, 10 days ago : storing to retrieve from main
+cbc44a8 - LucasBurmester, 10 days ago : changed the test for channels
+bf12cec - KatinkaMG, 10 days ago : some model weights
+6d04df2 - KatinkaMG, 10 days ago : fixed bug in linear layer
+158df61 - Katinka Grønnegaard, 10 days ago : Merge pull request #8 from katinka314/Katinka
+a0606b3 - KatinkaMG, 10 days ago : made the last layer trainable
+9447b05 - Lucas Burmester, 11 days ago : Merge pull request #7 from katinka314/lucas_branch
+0bbd4ce - LucasBurmester, 11 days ago : created the test of varying channels amount comparison between the GE-CNN and the normal CNN.
+52cf7c8 - Katinka Grønnegaard, 11 days ago : Merge pull request #6 from katinka314/Katinka
+435b824 - Katinka Grønnegaard, 11 days ago : Merge branch 'main' into Katinka
+fc43043 - Uffe Grøn Roepstorff, 11 days ago : Merge pull request #5 from katinka314/Uffe
+457344b - KatinkaMG, 11 days ago : progress on equivariance test
+b27dad7 - KatinkaMG, 11 days ago : updated train to be more flexible when chaning model parameters
+ef8fbc4 - Uffe Grøn Roepstorff, 11 days ago : Merge branch 'main' into Uffe
+52daa80 - uffe0520, 11 days ago : Bygget test, som tester roteret mod uroteret datasæt
+7da3edc - Lucas Burmester, 11 days ago : Merge pull request #4 from katinka314/lucas_branch
+b76bfb1 - LucasBurmester, 11 days ago : fixed the normal CNN and made it ready to compare fairly against our own GE-CNN
+9ee43ff - Katinka Grønnegaard, 11 days ago : Merge pull request #3 from katinka314/Katinka
+c7465b8 - KatinkaMG, 11 days ago : Fixed saving weights
+0affe4e - uffe0520, 11 days ago : Merge branch 'main' into uffe merger
+2872a2f - uffe0520, 11 days ago : Midlertidig, skal lige merge
+fe3cc21 - Lucas Burmester, 11 days ago : Merge pull request #2 from katinka314/lucas_branch
+1d6f43b - LucasBurmester, 11 days ago : ficed the train.py
+ccb8d27 - uffe0520, 11 days ago : Merge branch 'main' into Uffe
+9a00019 - KatinkaMG, 11 days ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+c315945 - KatinkaMG, 11 days ago : Changed directory to match file structure
+c8a60a2 - uffe0520, 11 days ago : Update train.py
+6011864 - uffe0520, 11 days ago : Opdateret beskrivelser for train og test
+9b8776a - uffe0520, 11 days ago : Update data.py
+02440c1 - KatinkaMG, 11 days ago : added init to fix uv issue
+1ae6237 - Lucas Burmester, 11 days ago : Merge pull request #1 from katinka314/lucas_branch
+764f4a1 - LucasBurmester, 11 days ago : train.py changed
+303d736 - KatinkaMG, 11 days ago : Changed folder structure and cleaned up unused files
+4b3dece - KatinkaMG, 11 days ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+fd18260 - KatinkaMG, 11 days ago : saved model weights
+c924cd2 - KatinkaMG, 11 days ago : cleaned unused functions
+e768ea2 - uffe0520, 11 days ago : Update train.py
+c6262f3 - KatinkaMG, 11 days ago : fix to projection layer
+83d3731 - KatinkaMG, 11 days ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+d80c783 - KatinkaMG, 11 days ago : projectionlayer change
+902f85c - uffe0520, 11 days ago : Update Model.py
+2df2dc5 - uffe0520, 11 days ago : Bygget train test loop + opdateret hotfixes til NN_module
+5c9946c - KatinkaMG, 12 days ago : added complex pooling method
+a6d3453 - uffe0520, 12 days ago : Update equivariance_test.ipynb
+35326e2 - uffe0520, 12 days ago : Update NN_layers.py
+d6d5536 - KatinkaMG, 12 days ago : added CNN
+fbfa7fb - KatinkaMG, 13 days ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+d92ccce - KatinkaMG, 13 days ago : timed various parts of the NN. added parameter to control MLP hidden units,
+8096467 - uffe0520, 13 days ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+a9a3ca4 - uffe0520, 13 days ago : Gitignore and datasetcreator to make the rotated fashion mnist dataset
+f07e045 - KatinkaMG, 13 days ago : changed sequential model to be adaptive to input parameters
+b63f278 - KatinkaMG, 13 days ago : started equivariance testing (rotated batch)
+ca3a6b2 - uffe0520, 13 days ago : Bygget første udkast itl en GE-CNN model
+2619f44 - uffe0520, 13 days ago : Fixet pathing, fjernet myFirstcnn fil
+6af5fc1 - uffe0520, 13 days ago : Rykket fourer transform fra functions til  ind i NN_layers
+c489658 - uffe0520, 13 days ago : Build NonLInear Function in NN_layers
+de3fb13 - uffe0520, 2 weeks ago : Implemented conv layer
+1820fca - KatinkaMG, 2 weeks ago : removed cookiecutter-files
+e4bea1d - uffe0520, 7 weeks ago : Tilføjet ConvLayer og opdateret forward step i LiftingLayer
+8d34a30 - KatinkaMG, 8 weeks ago : added the NNclasses to a seperate file
+4a98ce3 - uffe0520, 8 weeks ago : yallah vi er tættere på at det virker
+515f5d5 - uffe0520, 8 weeks ago : lndsfa
+50e8b2a - uffe0520, 9 weeks ago : opdateret efter snak med miklen
+658b6e2 - uffe0520, 9 weeks ago : Update lifting_layer.ipynb
+2f7d7c9 - uffe0520, 9 weeks ago : Update lifting_layer.ipynb
+363dbe0 - KatinkaMG, 9 weeks ago : added mapping
+649b545 - KatinkaMG, 9 weeks ago : skrrr
+250a950 - KatinkaMG, 9 weeks ago : added tensor( kernel 0 )
+7ae00d6 - KatinkaMG, 9 weeks ago : made the fourier generator a bit nicer
+9ff81ed - uffe0520, 9 weeks ago : Lifting layer projekt + functions fil, som har de funktioner vi skal kalde
+73f7b7a - KatinkaMG, 9 weeks ago : small changes in lifting layer
+04fb2f4 - KatinkaMG, 9 weeks ago : added venv to gitignore
+c50cac2 - uffe0520, 9 weeks ago : uffe file
+22213d1 - KatinkaMG, 10 weeks ago : Merge branch 'main' of https://github.com/katinka314/Fagprojekt---Group-Equivariance
+79d9b34 - KatinkaMG, 10 weeks ago : started implementation of lifting layer
+1d6e040 - KIDDER024, 10 weeks ago : gitignore fix
+ccccf2b - KIDDER024, 10 weeks ago : Dataload of MNIST and rotating MNIST
+69c5cfb - KIDDER024, 10 weeks ago : Added cookiecutter template
+88d70f0 - Katinka Grønnegaard, 4 months ago : Initial commit
