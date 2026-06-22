@@ -41,6 +41,8 @@ questions:
 │   └── processed/          # Preprocessed .pt tensors (generated, git-ignored)
 ├── reports/                # Experiment outputs (metrics, plots)
 ├── results/                # Aggregated result tensors (.pt)
+├── log.txt                 # Full one-line git commit history (contribution record)
+├── shortlog.txt            # Per-author commit counts + collaboration notes
 ├── pyproject.toml          # Dependencies and project metadata
 └── uv.lock                 # Locked dependency versions
 ```
@@ -150,6 +152,24 @@ python src/seed_power_worst_average.py
 
 All experiment outputs (metrics and plots) are stored under `reports/`, and
 aggregated result tensors under `results/`.
+
+## Contributions
+
+The git history is recorded for transparency about each member's contribution:
+
+- **`log.txt`** - the full one-line commit history (hash, author, relative date,
+  message) for the whole project.
+- **`shortlog.txt`** - per-author commit counts (direct commits and merges
+  listed separately), followed by notes on collaborative work that the commit
+  counts alone do not capture (for example, pair-programming on the steerable
+  layers).
+
+Both files can be regenerated from the repository root:
+
+```bash
+git log --pretty=format:'%h - %an, %ar : %s' > log.txt
+git shortlog -s -n > shortlog.txt   # then add the collaboration notes by hand
+```
 
 ## Authors
 
