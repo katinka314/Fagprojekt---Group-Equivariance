@@ -35,7 +35,7 @@ WEIGHTS = {
 }
 N_ROTATIONS   = 16     # number of angles, full circle (multiple of 4 -> 90-deg pairs exist)
 TARGET_LAYER  = 6      # depth of the partial model used for the scalar metric table
-NUM_IMAGES    = 1      # images to produce per-image plots/grids for
+NUM_IMAGES    = 4      # images to produce per-image plots/grids for
 NUM_QUANT_IMG = 200    # images to average the scalar metrics over
 N_GRID_IMG    = 200     # images to average the feature equivariance grid over
 CHANNEL       = 1      # default feature channel (per-plot channel is set in main)
@@ -145,7 +145,7 @@ def feats_at(model, target_layer, img):          # img [1,H,W] -> list of [C,h,w
         return [partial(r[None]).abs()[0] for r in rots]
 
 
-def plot_feature_grid(model, name, target_layer, channel, img, angles=(0, 22.5, 45,  90)):
+def plot_feature_grid(model, name, target_layer, channel, img, img_idx, angles=(0, 22.5, 45,  90)):
     feats = feats_at(model, target_layer, img)
     idxs  = [min(range(len(ANGLES)), key=lambda k: abs(ANGLES[k] - a)) for a in angles]
     ch0   = feats[0][channel].cpu()
@@ -161,7 +161,8 @@ def plot_feature_grid(model, name, target_layer, channel, img, angles=(0, 22.5, 
         ax[1, col].imshow(feats[gi][channel].cpu().numpy(), cmap="viridis"); ax[1, col].axis("off")
         ax[1, col].set_title(rf"$f(\rho(g)\,x)$  {a:.0f}°")
     fig.tight_layout(rect=[0, 0, 1, 0.95])
-    fig.savefig(OUT_DIR / f"{name}_L{target_layer}_ch{channel}_feature_plot.png", dpi=200)
+    fig.savefig(OUT_DIR / f"{name}_img{img_idx}_L{target_layer}_ch{channel}_feature_plot.png", dpi=200)
+    plt.close(fig)
 
 
 def plot_class_scores(mat, name, idx, kind, cls):     # mat [N_angles,10]; cls = true class of the image
@@ -171,7 +172,7 @@ def plot_class_scores(mat, name, idx, kind, cls):     # mat [N_angles,10]; cls =
     plt.xticks(range(10), CLASS_NAMES, rotation=90)
     plt.yticks(range(len(ANGLES)), [f"{a:.0f}" for a in ANGLES])
     plt.title(f"{name}: {kind} scores for image class: {cls}"); plt.tight_layout()
-    plt.savefig(OUT_DIR / f"{name}_classscores_{kind}_img{idx}.png", dpi=200); plt.close()
+    plt.savefig(OUT_DIR / f"{name}_img{idx}_classscores_{kind}.png", dpi=200); plt.close()
 
 
 def plot_invariance_grid(D, name, vmax=None):    # mean softmax invariance grid ||p_i - p_j||
@@ -218,14 +219,21 @@ def ms(values):
 def main():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     data   = RotatedMNIST(split="test", rotated=False, padding=PADDING)   # unrotated; we rotate ourselves
-    img0   = data[0][0]
-    cls0   = CLASS_NAMES[int(data[0][1])]                                 # true class of the shown image
     models = {name: load_model(path) for name, path in WEIGHTS.items()}
 
-    # --- Feature plots: (model, layer, channel) ---
-    for name, layer, ch in [("GE_CNN", 2, 3), ("GE_CNN", 6, 7),
-                            ("CNN", 2, 3), ("CNN", 6, 15)]:
-        plot_feature_grid(models[name], name, layer, ch, img0)
+    # --- Per-image plots: feature plots + class-score grids for NUM_IMAGES images ---
+    # The same (model, layer, channel) feature combos are shown for every image.
+    feature_plots = [("GE_CNN", 2, 3), ("GE_CNN", 6, 7), ("CNN", 2, 3), ("CNN", 6, 15)]
+    for x in range(NUM_IMAGES):
+        img = data[x][0]
+        cls = CLASS_NAMES[int(data[x][1])]                                # true class of this image
+        for name, layer, ch in feature_plots:
+            plot_feature_grid(models[name], name, layer, ch, img, x)
+        rots = rotate_to_angles(img).to(DEVICE)
+        for name, model in models.items():
+            with torch.no_grad():
+                logits = torch.stack([model(r[None])[0] for r in rots])
+            plot_class_scores(torch.softmax(logits, dim=1), name, x, "softmax", cls)
 
     # --- Feature equivariance grids at layer 2 and 6, both models (mean over images) ---
     grid_imgs = [data[i][0] for i in range(N_GRID_IMG)]
@@ -233,26 +241,13 @@ def main():
         for layer in (2, 6):
             plot_feature_diffgrid(model, name, layer, grid_imgs)
 
-    # --- Invariance plots + scalar metrics (table uses global TARGET_LAYER) ---
+    # --- Scalar metrics + mean softmax invariance grids (table uses global TARGET_LAYER) ---
     summary = {}
-
-    # img0 softmax per model, so both invariance grids share one color scale.
-    img0_rots = rotate_to_angles(img0).to(DEVICE)
-    img0_logits, img0_soft = {}, {}
-    for name, model in models.items():
-        with torch.no_grad():
-            lg = torch.stack([model(r[None])[0] for r in img0_rots])
-        img0_logits[name] = lg
-        img0_soft[name] = torch.softmax(lg, dim=1)
     inv_grids = {}
-
     for name, model in models.items():
         partial  = make_partial(model, TARGET_LAYER)
         n_params = sum(p.numel() for p in model.parameters())
         print(f"\n=== {name} | params={n_params:,} | layers={TARGET_LAYER} | angles={N_ROTATIONS} ===")
-
-        plot_class_scores(img0_logits[name], name, 0, "logit", cls0)
-        plot_class_scores(img0_soft[name],   name, 0, "softmax", cls0)
 
         acc = {m: {s: [] for s in ("exact", "interp", "all")}
                for m in ("logit", "softmax", "feature")}
