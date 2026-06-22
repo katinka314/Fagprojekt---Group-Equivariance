@@ -7,7 +7,10 @@ name = "group_equivariant_learning"
 version = "0.0.1"
 description = "Creating a group equivariant CNN"
 authors = [
-  { name = "group_2", email = "your@email.com" },
+  { name = "Uffe Grøn", email = "s245109@dtu.dk" },
+  { name = "Katinka Grønnegaard", email = "s235058@dtu.dk" },
+  { name = "Phi Vo", email = "s245290@dtu.dk" },
+  { name = "Lucas Burmester", email = "s244322@dtu.dk" },
 ]
 license = { file = "LICENSE" }
 keywords = ["machine learning", "deep learning", "group equivariance", "computer vision"]

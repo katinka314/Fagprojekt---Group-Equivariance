@@ -1,5 +1,0 @@
-Traceback (most recent call last):
-  File "/zhome/15/2/217301/desktop/Fagprojekt---Group-Equivariance/src/test_parameters_datasize_v2.py", line 1, in <module>
-    v2: src/test_parameters_datasize_v2.py
-        ^^^
-NameError: name 'src' is not defined
