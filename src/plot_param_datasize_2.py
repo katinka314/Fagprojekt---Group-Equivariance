@@ -232,7 +232,7 @@ ax.set_xscale("log")
 ax.set_xticks(ds_pct)
 ax.set_xticklabels([f"{p:g}%" for p in ds_pct])
 ax.set_xlabel("Training set size (% of full set, log scale)")
-ax.set_ylabel("Test accuracy (mean ± 95% CI)")
+ax.set_ylabel("Test accuracy (mean over 15 seeds)")
 ax.set_title("Parameter-matched comparisons: GE-CNN (green→blue) vs CNN (yellow→red)")
 ax.grid(True, alpha=0.3)
 ax.legend(ncol=2, fontsize=8)
@@ -261,8 +261,8 @@ for i, ds in enumerate(DATASIZES):
 
 ax.set_xscale("log")
 ax.set_xlabel("Number of parameters (log scale)")
-ax.set_ylabel("Test accuracy (mean ± 95% CI)")
-ax.set_title("Accuracy vs parameter count, by data size (GE-CNN solid, CNN dashed)")
+ax.set_ylabel("Test accuracy (mean over 15 seeds)")
+ax.set_title("Accuracy vs parameter count, by data size")
 ax.grid(True, alpha=0.3)
 
 
