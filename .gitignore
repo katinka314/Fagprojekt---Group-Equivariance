@@ -17,6 +17,11 @@ manual_test/
 # Mac OS-specific storage files
 .DS_Store
 
+# HPC job logs (LSF output / notifications)
+*lsf_*.out
+*lsf_*.err
+notif_*.out
+
 # Data
 
 

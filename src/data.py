@@ -9,10 +9,6 @@ import torch.nn.functional as F
 import kagglehub
 
 
-
-
-
- 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_DATA_DIR = PROJECT_ROOT / "data" / "raw" / "archive"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "data" / "processed"
@@ -67,8 +63,6 @@ class RotatedMNIST(Dataset):
             generator = torch.Generator().manual_seed(seed)
             if stratified:
                 per_label_indices = []
-                #for label in self.labels.unique():
-                #print(self.labels.unique())
                 for label in sorted(set(self.labels.tolist())):
                     label_idx = (self.labels == label).nonzero(as_tuple=True)[0]
                     n_label = int(len(label_idx) * fraction)
@@ -133,6 +127,16 @@ def rotate_dataset(images: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
 
     rotated_images = torch.stack(rotated_images)
     angles = torch.tensor(angles, dtype=torch.float32)
+
+    return rotated_images, angles
+
+
+def rotate_90(images: torch.Tensor, seed: int = 42) -> tuple[torch.Tensor, torch.Tensor]:
+    """Rotate each image by a random multiple of 90 degrees (exact, no interpolation)."""
+    g = torch.Generator().manual_seed(seed)
+    ks = torch.randint(0, 4, (len(images),), generator=g)   # number of 90-degree turns per image
+    rotated_images = torch.stack([torch.rot90(img, int(k), dims=(0, 1)) for img, k in zip(images, ks)])
+    angles = ks.to(torch.float32) * 90.0
 
     return rotated_images, angles
 
